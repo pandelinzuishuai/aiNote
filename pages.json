@@ -1,0 +1,101 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "学习助手",
+				"navigationBarHidden": true
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": "登录",
+				"navigationBarHidden": true,
+				"backgroundColor": "#ffffff"
+			}
+		},
+		{
+			"path": "pages/register/register",
+			"style": {
+				"navigationBarTitleText": "注册",
+				"navigationBarHidden": true,
+				"backgroundColor": "#ffffff"
+			}
+		},
+		{
+			"path": "pages/notes/notes",
+			"style": {
+				"navigationBarTitleText": "笔记",
+				"navigationBarHidden": true
+			}
+		},
+		{
+			"path": "pages/tasks/tasks",
+			"style": {
+				"navigationBarTitleText": "任务",
+				"navigationBarHidden": true
+			}
+		},
+		{
+			"path": "pages/tasks/add-task",
+			"style": {
+				"navigationBarTitleText": "创建任务",
+				"navigationBarHidden": true
+			}
+		},
+		{
+			"path": "pages/tasks/task-detail",
+			"style": {
+				"navigationBarTitleText": "任务详情",
+				"navigationBarHidden": true
+			}
+		},
+		{
+			"path": "pages/mine/mine",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"navigationBarHidden": true
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "学习助手",
+		"navigationBarBackgroundColor": "#ffffff",
+		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"color": "#999999",
+		"selectedColor": "#5374f7",
+		"backgroundColor": "#ffffff",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "主页",
+				"iconPath": "static/tabbar/home.png",
+				"selectedIconPath": "static/tabbar/home_selected.png",
+				"selectedColor":"#5374f7"
+			},
+			{
+				"pagePath": "pages/notes/notes",
+				"text": "笔记",
+				"iconPath": "static/tabbar/notes.png",
+				"selectedIconPath": "static/tabbar/notes_selected.png"
+			},
+			{
+				"pagePath": "pages/tasks/tasks",
+				"text": "任务",
+				"iconPath": "static/tabbar/tasks.png",
+				"selectedIconPath": "static/tabbar/tasks_selected.png"
+			},
+			{
+				"pagePath": "pages/mine/mine",
+				"text": "我的",
+				"iconPath": "static/tabbar/mine.png",
+				"selectedIconPath": "static/tabbar/mine_selected.png"
+			}
+		]
+	},
+	"uniIdRouter": {}
+}

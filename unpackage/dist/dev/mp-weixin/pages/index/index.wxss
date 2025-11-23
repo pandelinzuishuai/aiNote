@@ -1,0 +1,194 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.main-container.data-v-1cf27b2a {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding: 30rpx 20rpx 120rpx;
+}
+.header.data-v-1cf27b2a {
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header .page-title.data-v-1cf27b2a {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333333;
+}
+.header .user-info.data-v-1cf27b2a {
+  display: flex;
+  align-items: center;
+  padding: 10rpx;
+  border-radius: 12rpx;
+  background-color: #f5f5f5;
+}
+.header .avatar.data-v-1cf27b2a {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background-color: #5374f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16rpx;
+}
+.header .avatar-text.data-v-1cf27b2a {
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.header .user-details.data-v-1cf27b2a {
+  display: flex;
+  flex-direction: column;
+}
+.header .user-name.data-v-1cf27b2a {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333333;
+}
+.header .logout-text.data-v-1cf27b2a {
+  font-size: 22rpx;
+  color: #999999;
+  margin-top: 2rpx;
+}
+.stats-container.data-v-1cf27b2a {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+.stats-container .stat-card.data-v-1cf27b2a {
+  flex: 1;
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 28rpx 0;
+  text-align: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.stats-container .stat-card .stat-number.data-v-1cf27b2a {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #5374f7;
+  margin-bottom: 8rpx;
+}
+.stats-container .stat-card .stat-label.data-v-1cf27b2a {
+  font-size: 24rpx;
+  color: #666666;
+}
+.today-tasks.data-v-1cf27b2a,
+.upcoming-tasks.data-v-1cf27b2a {
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+.today-tasks .section-header.data-v-1cf27b2a,
+.upcoming-tasks .section-header.data-v-1cf27b2a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28rpx;
+}
+.today-tasks .section-header .section-title.data-v-1cf27b2a,
+.upcoming-tasks .section-header .section-title.data-v-1cf27b2a {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+}
+.today-tasks .section-header .section-more.data-v-1cf27b2a,
+.upcoming-tasks .section-header .section-more.data-v-1cf27b2a {
+  font-size: 26rpx;
+  color: #5374f7;
+}
+.today-tasks .task-list .task-item.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item.data-v-1cf27b2a {
+  display: flex;
+  align-items: flex-start;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.today-tasks .task-list .task-item.data-v-1cf27b2a:last-child,
+.upcoming-tasks .task-list .task-item.data-v-1cf27b2a:last-child {
+  border-bottom: none;
+}
+.today-tasks .task-list .task-item .task-checkbox.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-checkbox.data-v-1cf27b2a {
+  transform: scale(0.8);
+  margin-right: 16rpx;
+  margin-top: 8rpx;
+}
+.today-tasks .task-list .task-item .task-content.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content.data-v-1cf27b2a {
+  flex: 1;
+}
+.today-tasks .task-list .task-item .task-content .task-title.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content .task-title.data-v-1cf27b2a {
+  display: block;
+  font-size: 30rpx;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+.today-tasks .task-list .task-item .task-content .task-time.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content .task-time.data-v-1cf27b2a {
+  font-size: 24rpx;
+  color: #999999;
+}
+.today-tasks .task-list .task-item .task-content .task-deadline.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content .task-deadline.data-v-1cf27b2a {
+  display: flex;
+  align-items: center;
+}
+.today-tasks .task-list .task-item .task-content .task-deadline .deadline-label.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content .task-deadline .deadline-label.data-v-1cf27b2a {
+  font-size: 24rpx;
+  color: #999999;
+  margin-right: 12rpx;
+}
+.today-tasks .task-list .task-item .task-content .task-deadline .priority-tag.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content .task-deadline .priority-tag.data-v-1cf27b2a {
+  padding: 4rpx 16rpx;
+  border-radius: 12rpx;
+  font-size: 20rpx;
+}
+.today-tasks .task-list .task-item .task-content .task-deadline .priority-tag.high.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content .task-deadline .priority-tag.high.data-v-1cf27b2a {
+  background-color: #ffe6e6;
+  color: #ff4d4f;
+}
+.today-tasks .task-list .task-item .task-content .task-deadline .priority-tag.medium.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content .task-deadline .priority-tag.medium.data-v-1cf27b2a {
+  background-color: #fff7e6;
+  color: #faad14;
+}
+.today-tasks .task-list .task-item .task-content .task-deadline .priority-tag.low.data-v-1cf27b2a,
+.upcoming-tasks .task-list .task-item .task-content .task-deadline .priority-tag.low.data-v-1cf27b2a {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
