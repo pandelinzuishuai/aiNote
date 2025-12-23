@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const api_note = require("../../api/note.js");
+const utils_storage = require("../../utils/storage.js");
 const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
@@ -57,11 +58,13 @@ const _sfc_main = {
         const query = {
           currentPage: this.currentPage,
           pageSize: this.pageSize,
-          title: this.searchValue
+          title: this.searchValue,
           // 添加搜索条件
+          userId: utils_storage.getUserId()
+          // 添加userId参数
         };
         const res = await api_note.getNoteList(query);
-        common_vendor.index.__f__("log", "at pages/notes/notes.vue:176", "笔记列表API返回:", res);
+        common_vendor.index.__f__("log", "at pages/notes/notes.vue:179", "笔记列表API返回:", res);
         const records = res.data && res.data.records ? res.data.records : [];
         const newNotes = records.map((note) => {
           const tagIds = note.tagId ? note.tagId.split(",").map((id) => parseInt(id.trim())) : [];
@@ -92,7 +95,7 @@ const _sfc_main = {
           this.currentPage++;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/notes/notes.vue:222", "加载笔记列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/notes/notes.vue:225", "加载笔记列表失败:", error);
         common_vendor.index.showToast({
           title: "加载失败，请重试",
           icon: "none"

@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const api_task = require("../../api/task.js");
+const utils_storage = require("../../utils/storage.js");
 const _sfc_main = {
   data() {
     return {
@@ -31,7 +32,9 @@ const _sfc_main = {
         const query = {
           currentPage: this.currentPage,
           pageSize: this.pageSize,
-          status: this.activeTab === "all" ? "" : this.activeTab
+          status: this.activeTab === "all" ? "" : this.activeTab,
+          userId: utils_storage.getUserId()
+          // 添加userId参数
         };
         const res = await api_task.getTaskList(query);
         if (res && res.data) {
@@ -40,10 +43,10 @@ const _sfc_main = {
         } else {
           this.tasks = [];
           this.total = 0;
-          common_vendor.index.__f__("warn", "at pages/tasks/tasks.vue:190", "响应数据结构不符合预期:", res);
+          common_vendor.index.__f__("warn", "at pages/tasks/tasks.vue:192", "响应数据结构不符合预期:", res);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/tasks/tasks.vue:193", "获取任务列表失败:", error);
+        common_vendor.index.__f__("error", "at pages/tasks/tasks.vue:195", "获取任务列表失败:", error);
         this.tasks = [];
         this.total = 0;
         common_vendor.index.showToast({
@@ -112,7 +115,7 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/tasks/tasks.vue:284", "更新任务状态失败:", error);
+        common_vendor.index.__f__("error", "at pages/tasks/tasks.vue:286", "更新任务状态失败:", error);
         common_vendor.index.showToast({
           title: "更新任务状态失败",
           icon: "none"

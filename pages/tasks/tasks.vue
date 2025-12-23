@@ -144,6 +144,7 @@
 
 <script>
 import { getTaskList, updateTaskStatus } from "../../api/task";
+import { getUserId } from "../../utils/storage";
 
 export default {
   data() {
@@ -176,6 +177,7 @@ export default {
           currentPage: this.currentPage,
           pageSize: this.pageSize,
           status: this.activeTab === "all" ? "" : this.activeTab,
+          userId: getUserId(), // 添加userId参数
         };
 
         const res = await getTaskList(query);

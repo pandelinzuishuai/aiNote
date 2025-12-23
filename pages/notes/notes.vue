@@ -93,6 +93,8 @@
 <script>
 // 导入笔记API
 import { getNoteList } from "../../api/note";
+// 导入存储工具函数
+import { getUserId } from "../../utils/storage";
 
 export default {
   data() {
@@ -168,6 +170,7 @@ export default {
           currentPage: this.currentPage,
           pageSize: this.pageSize,
           title: this.searchValue, // 添加搜索条件
+          userId: getUserId(), // 添加userId参数
         };
 
         // 调用真实的API
