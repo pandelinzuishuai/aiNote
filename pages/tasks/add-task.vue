@@ -1,12 +1,5 @@
 <template>
   <view class="add-task-container page-container">
-    <view class="header">
-      <view class="back-button" @click="goBack">
-        <text class="back-icon">←</text>
-      </view>
-      <text class="page-title">创建新任务</text>
-    </view>
-
     <scroll-view scroll-y="true" class="form-scroll">
       <view class="form-container">
         <view class="form-item">
@@ -28,6 +21,33 @@
             maxlength="500"
             rows="4"
           />
+        </view>
+        <!-- 学科选择 -->
+        <view class="form-item">
+          <text class="section-label">所属学科</text>
+          <uni-data-select
+            v-model="task.subjectId"
+            :localdata="subjectList"
+            :loading="subjectLoading"
+            placeholder="请选择学科"
+            mode="none"
+            clearable
+            @change="
+              (e) => {
+                // 当学科变更时，更新对应的学科名称
+                const selected = this.subjectList.find(
+                  (s) => s.value === e.detail.value
+                );
+                this.task.subjectName = selected ? selected.text : '';
+              }
+            "
+          />
+          <text
+            v-if="task.subjectId && subjectList.length > 0"
+            class="selected-subject-info"
+          >
+            当前选择: {{ getSelectedSubjectName() }}
+          </text>
         </view>
 
         <view class="form-item">
@@ -61,12 +81,11 @@
             </view>
           </view>
         </view>
-        1111
         <view class="form-item">
           <view class="form-label">截止日期</view>
           <uni-datetime-picker
             type="datetime"
-            :value="task.deadline"
+            v-model="task.deadline"
             :start="new Date().toISOString().split('T')[0]"
             :end="new Date().getFullYear() + 3 + '-12-31'"
             @change="onDeadlineChange"
@@ -75,58 +94,23 @@
           />
         </view>
 
+        <!-- 标签选择 -->
         <view class="form-item">
-          <view class="form-label">估计时间</view>
-          <view class="time-picker-container">
-            <view class="picker-item">
-              <view class="picker-label">开始时间</view>
-              <uni-datetime-picker
-                type="time"
-                :value="task.estimatedStartTime"
-                @change="onStartTimeChange"
-                placeholder="选择开始时间"
-                border
-              />
-            </view>
-            <view class="picker-item">
-              <view class="picker-label">结束时间</view>
-              <uni-datetime-picker
-                type="time"
-                :value="task.estimatedEndTime"
-                @change="onEndTimeChange"
-                placeholder="选择结束时间"
-                border
-              />
-            </view>
-          </view>
-        </view>
-        <view class="form-item">
-          <view class="form-label">关联标签</view>
-          <input
-            class="form-input"
-            v-model="task.tags"
-            placeholder="输入标签或选择已有标签"
-            maxlength="50"
-          />
+          <text class="section-label">关联标签</text>
           <view class="tags-container">
             <view
-              v-for="(tag, index) in popularTags"
-              :key="index"
+              v-for="tag in tags"
+              :key="tag.id"
               class="tag-item"
-              @click="selectTag(tag)"
+              @click="removeTag(tag.id)"
             >
-              <text># {{ tag }}</text>
+              {{ tag.tagName }}
+              <text class="tag-close">×</text>
+            </view>
+            <view class="tag-add-btn" @click="openTagSelector">
+              + 添加标签
             </view>
           </view>
-        </view>
-        <view class="form-item">
-          <view class="form-label">所属课程/项目</view>
-          <input
-            class="form-input"
-            v-model="task.course"
-            placeholder="例如：数学分析"
-            maxlength="50"
-          />
         </view>
       </view>
     </scroll-view>
@@ -138,15 +122,51 @@
         @click="submitTask"
         :disabled="!isFormValid"
       >
-        创建任务
+        {{ isEditMode ? "更新任务" : "创建任务" }}
       </button>
     </view>
+    <!-- 标签选择器弹窗 -->
+    <uni-drawer ref="showRight" mode="right" background-color="#fff">
+      <view class="tag-selector-content">
+        <view class="tag-selector-header">
+          <text class="tag-selector-title">选择标签</text>
+          <view class="tag-selector-close" @click="closeTagSelector">
+            <text class="close-icon">×</text>
+          </view>
+        </view>
+        <view class="tag-list" @scrolltolower="loadMoreTags">
+          <uni-tag
+            v-for="tag in tagList"
+            :key="tag.id"
+            :text="tag.tagName"
+            :type="isTagSelected(tag.id) ? 'primary' : 'default'"
+            inverted
+            @click="toggleTag(tag)"
+          />
+          <!-- 加载更多提示 -->
+          <view v-if="tagLoading" class="loading-more">
+            <text>加载中...</text>
+          </view>
+
+          <!-- 没有更多数据提示 -->
+          <view
+            v-else-if="!hasMoreTags && tagList.length > 0"
+            class="no-more-data"
+          >
+            <text>没有更多标签了</text>
+          </view>
+        </view>
+      </view>
+    </uni-drawer>
   </view>
 </template>
 
 <script>
-import { addTask } from "../../api/task";
+import { addTask, getTaskInfo, updateTask } from "../../api/task";
 import { getUserId, removeUserId } from "../../utils/storage";
+// 导入现成的接口函数，而不是直接使用request
+import { getSubjectList } from "../../api/subject";
+import { getTagList } from "../../api/tag";
 
 export default {
   data() {
@@ -162,33 +182,35 @@ export default {
     // 设置默认结束日期为明天
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const defaultDeadline =
-      tomorrow.getFullYear() +
-      "-" +
-      String(tomorrow.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(tomorrow.getDate()).padStart(2, "0") +
-      " 18:00";
 
     return {
       task: {
+        taskId: "", // 任务ID，用于编辑模式
         title: "",
         description: "",
-        priority: "medium", // 默认中等优先级
-        deadline: defaultDeadline,
-        estimatedStartTime: "",
-        estimatedEndTime: "",
-        tags: "",
-        course: "",
+        priority: "中", // 默认中等优先级
+        deadline: "",
+        remindTime: "", // 提醒时间，暂不使用
+        tagId: "", // 标签ID，逗号分隔的字符串
+        subjectId: "", // 学科ID
+        subjectName: "", // 学科名称
       },
+      isEditMode: false, // 是否为编辑模式
+      tags: [], // 已选标签
       popularTags: ["作业", "复习", "预习", "实验", "报告", "论文", "考试"],
       startDate: startDate,
       isDatePickerVisible: false,
       isTimePickerVisible: false,
       currentPicker: "",
-      // 开发测试模式
-
-      defaultDeadline: defaultDeadline,
+      // 学科选择相关
+      subjectList: [],
+      subjectLoading: false,
+      // 标签选择相关
+      tagList: [],
+      tagLoading: false,
+      currentPage: 1, // 分页相关参数
+      pageSize: 20, // 每页加载的标签数量
+      hasMoreTags: true,
     };
   },
   computed: {
@@ -204,7 +226,8 @@ export default {
     // 监听截止日期变化，检查是否选择了过去的日期
     "task.deadline"(newVal) {
       if (newVal) {
-        const selectedDate = new Date(newVal);
+        const cleanedDate = newVal.replace(" ", "T");
+        const selectedDate = new Date(cleanedDate);
         const now = new Date();
         now.setHours(0, 0, 0, 0);
 
@@ -218,26 +241,309 @@ export default {
       }
     },
   },
+  onLoad(options) {
+    // 根据传入参数判断是否为编辑模式
+    if (options && options.taskId) {
+      this.isEditMode = true;
+      this.task.taskId = options.taskId;
+      // 设置导航栏标题
+      uni.setNavigationBarTitle({
+        title: "编辑任务",
+      });
+    } else {
+      // 设置导航栏标题
+      uni.setNavigationBarTitle({
+        title: "创建任务",
+      });
+    }
+
+    // 初始化加载学科列表
+    this.fetchSubjectList();
+    // 预加载标签列表（传入true表示重置并重新加载）
+    this.fetchTagList(true);
+
+    // 检查是否为编辑模式并加载任务详情
+    if (this.isEditMode) {
+      // 加载任务详情
+      this.loadTaskDetail();
+    } else if (options && options.id && options.edit === "true") {
+      // 兼容旧的参数方式
+      this.isEditMode = true;
+      this.task.taskId = options.id;
+      uni.setNavigationBarTitle({
+        title: "编辑任务",
+      });
+      this.loadTaskDetail();
+    }
+  },
   methods: {
     goBack() {
       uni.navigateBack();
     },
+
+    // 加载任务详情
+    async loadTaskDetail() {
+      if (!this.task.taskId) {
+        console.error("任务ID不存在");
+        return;
+      }
+
+      try {
+        uni.showLoading({
+          title: "加载中...",
+        });
+
+        const response = await getTaskInfo(this.task.taskId);
+        console.log("任务详情:", response);
+
+        if (response && response.code === 200 && response.data) {
+          const taskData = response.data;
+
+          // 填充任务数据
+          this.task.title = taskData.taskName || "";
+          this.task.description = taskData.description || "";
+          this.task.priority = taskData.priority || "中";
+
+          // 格式化截止日期，确保生成iOS兼容的格式
+          if (taskData.deadline) {
+            // 处理日期格式，确保兼容iOS设备
+            // 先移除时区信息
+            this.task.deadline = taskData.deadline.replace("T", " ");
+            console.log("格式化后的截止日期:", this.task.deadline);
+          } else {
+            this.task.deadline = "";
+          }
+
+          this.task.subjectId = taskData.subjectId;
+          this.task.subjectName = taskData.subjectName || "";
+
+          // 处理标签数据
+          if (taskData.tagId) {
+            this.task.tagId = taskData.tagId;
+
+            // 立即处理标签，不再等待nextTick
+            const tagIds = taskData.tagId.split(",");
+            this.tags = [];
+
+            console.log("标签ID列表:", tagIds);
+            console.log("可用标签列表:", this.tagList);
+
+            // 从已加载的标签列表中找出对应的标签并选中
+            // 使用String()确保类型匹配
+            tagIds.forEach((tagId) => {
+              const tag = this.tagList.find(
+                (t) => String(t.id) === String(tagId)
+              );
+              if (tag) {
+                this.tags.push(tag);
+                console.log("找到并添加标签:", tag.tagName);
+              } else {
+                console.log("未找到标签:", tagId);
+                // 如果找不到，创建一个临时标签对象以显示在UI上
+                this.tags.push({ id: tagId, tagName: "标签" + tagId });
+              }
+            });
+          } else {
+            this.task.tagId = "";
+            this.tags = [];
+          }
+        } else {
+          uni.showToast({
+            title: response?.msg || "加载任务详情失败",
+            icon: "none",
+          });
+        }
+        console.log(this.task);
+      } catch (error) {
+        console.error("加载任务详情异常:", error);
+        uni.showToast({
+          title: "加载任务详情异常，请重试",
+          icon: "none",
+        });
+      } finally {
+        uni.hideLoading();
+      }
+    },
+
+    // 获取选中的学科名称
+    getSelectedSubjectName() {
+      const subject = this.subjectList.find(
+        (s) => s.value === this.task.subjectId
+      );
+      return subject ? subject.text : "";
+    },
+
+    // 获取学科列表
+    async fetchSubjectList() {
+      try {
+        this.subjectLoading = true;
+
+        // 获取科目列表，使用较大的pageSize确保一次性加载所有科目
+        const subjectQuery = {
+          currentPage: 1,
+          pageSize: 100, // 假设不会有超过100个科目
+        };
+
+        console.log("获取科目列表，参数:", subjectQuery);
+        const result = await getSubjectList(subjectQuery);
+        console.log("获取科目列表结果:", result);
+
+        // 根据API返回格式调整数据结构
+        if (
+          result &&
+          result.code === 200 &&
+          result.data &&
+          Array.isArray(result.data.records)
+        ) {
+          // 转换records数组为需要的格式，适配uni-data-select组件
+          this.subjectList = result.data.records.map((subject) => ({
+            value: subject.subjectId, // 使用subjectId作为value
+            text: subject.subjectName, // 使用subjectName作为显示文本
+          }));
+
+          console.log("转换后的科目列表:", this.subjectList);
+        } else {
+          // 如果没有数据，提供默认学科选项
+          this.subjectList = [
+            { value: "1", text: "专业课" },
+            { value: "2", text: "公共课" },
+            { value: "3", text: "选修课" },
+          ];
+        }
+      } catch (error) {
+        console.error("获取学科列表失败", error);
+        // 出错时提供默认选项
+        this.subjectList = [
+          { value: "1", text: "专业课" },
+          { value: "2", text: "公共课" },
+          { value: "3", text: "选修课" },
+        ];
+      } finally {
+        this.subjectLoading = false;
+      }
+    },
+
+    // 获取标签列表（支持分页和重置）
+    async fetchTagList(reset = false) {
+      try {
+        // 如果是重置，则重置页码
+        if (reset) {
+          this.currentPage = 1;
+          this.tagList = [];
+          this.hasMoreTags = true;
+
+          this.tagLoading = true;
+        }
+
+        // 构建分页参数
+        const tagQuery = {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+        };
+
+        console.log("获取标签列表，分页参数:", tagQuery);
+        const result = await getTagList(tagQuery);
+        console.log("获取标签列表结果:", result);
+
+        // 根据API返回格式调整数据结构
+        if (result.code === 200) {
+          // 转换records数组为需要的格式
+          const newTags = result.data.records.map((tag) => ({
+            id: tag.tagId, // 注意这里使用tagId而不是id
+            tagName: tag.tagName,
+          }));
+
+          // 如果是重置则替换数据，否则追加数据
+          if (reset) {
+            this.tagList = newTags;
+          } else {
+            this.tagList = [...this.tagList, ...newTags];
+          }
+
+          // 判断是否还有更多数据
+          const totalRecords = result.data.total || 0;
+          this.hasMoreTags = this.tagList.length < totalRecords;
+
+        } else {
+          this.hasMoreTags = false;
+        }
+      } catch (error) {
+        console.error("获取标签列表失败:", error);
+        this.hasMoreTags = false;
+      } finally {
+        this.tagLoading = false;
+      }
+    },
+
+    // 加载更多标签（无限滚动）
+    async loadMoreTags() {
+      // 如果没有更多数据或者正在加载中，则不重复加载
+      if (!this.hasMoreTags || this.tagLoading) {
+        return;
+      }
+
+      this.tagLoading = true;
+      this.currentPage++;
+      await this.fetchTagList(false); // 传递false表示追加数据
+    },
+
+    // 打开标签选择器
+    openTagSelector() {
+      this.$refs.showRight.open("right");
+    },
+
+    // 关闭标签选择器
+    closeTagSelector() {
+      this.$refs.showRight.close();
+      // 更新任务的标签ID
+      this.updateTaskTags();
+    },
+
+    // 切换标签选择状态
+    toggleTag(tag) {
+      const index = this.tags.findIndex((t) => t.id === tag.id);
+      if (index > -1) {
+        // 取消选择
+        this.tags.splice(index, 1);
+      } else {
+        // 添加选择
+        this.tags.push(tag);
+      }
+      console.log(this.tags);
+    },
+
+    // 移除单个标签
+    removeTag(tagId) {
+      const index = this.tags.findIndex((tag) => tag.id === tagId);
+      if (index > -1) {
+        this.tags.splice(index, 1);
+      }
+    },
+
+    // 判断标签是否选中
+    isTagSelected(tagId) {
+      return this.tags.some((tag) => tag.id === tagId);
+    },
+
+    // 兼容旧的selectTag方法
     selectTag(tag) {
       // 如果已有标签，添加空格分隔
       if (this.task.tags) {
-        this.task.tags += " ";
+        this.task.tags += ",";
       }
       this.task.tags += tag;
     },
     // 处理截止日期变化
     onDeadlineChange(e) {
       this.task.deadline = e;
+      console.log(e);
     },
     // 移除不再需要的确认和取消方法，内置API直接处理
 
     // onDateCancel 方法已移除，内置API会自动处理取消逻辑
     // 表单验证方法
     validateForm() {
+      console.log(this.task);
       // 验证任务标题
       if (!this.task.title.trim()) {
         uni.showToast({
@@ -264,20 +570,22 @@ export default {
         return false;
       }
 
-      // 验证时间范围
-      if (this.task.estimatedStartTime && this.task.estimatedEndTime) {
-        const startTime = new Date(
-          `2000-01-01 ${this.task.estimatedStartTime}`
-        );
-        const endTime = new Date(`2000-01-01 ${this.task.estimatedEndTime}`);
+      // 验证截止日期非空
+      if (!this.task.deadline || !this.task.deadline.trim()) {
+        uni.showToast({
+          title: "请选择截止日期",
+          icon: "none",
+        });
+        return false;
+      }
 
-        if (startTime >= endTime) {
-          uni.showToast({
-            title: "开始时间不能晚于结束时间",
-            icon: "none",
-          });
-          return false;
-        }
+      // 验证标签选择必选
+      if (!this.task.tagId || this.task.tagId.trim() === "") {
+        uni.showToast({
+          title: "请至少选择一个标签",
+          icon: "none",
+        });
+        return false;
       }
 
       return true;
@@ -300,116 +608,93 @@ export default {
       }
       return true;
     },
-    // 处理开始时间变化
-    onStartTimeChange(e) {
-      this.task.estimatedStartTime = e;
-    },
 
-    // 处理结束时间变化
-    onEndTimeChange(e) {
-      this.task.estimatedEndTime = e;
-    },
-
-    // 构建完整描述，包含原始描述和额外信息
-    buildFullDescription() {
-      let fullDescription = this.task.description?.trim() || "";
-
-      // 如果有额外信息，添加到描述中
-      const additionalInfo = [];
-
-      if (this.task.estimatedStartTime && this.task.estimatedEndTime) {
-        additionalInfo.push(
-          `预计时间: ${this.task.estimatedStartTime} - ${this.task.estimatedEndTime}`
-        );
-      } else if (this.task.estimatedStartTime) {
-        additionalInfo.push(`预计开始时间: ${this.task.estimatedStartTime}`);
-      } else if (this.task.estimatedEndTime) {
-        additionalInfo.push(`预计结束时间: ${this.task.estimatedEndTime}`);
-      }
-
-      if (this.task.tags?.trim()) {
-        additionalInfo.push(`标签: ${this.task.tags.trim()}`);
-      }
-
-      if (this.task.course?.trim()) {
-        additionalInfo.push(`课程/项目: ${this.task.course.trim()}`);
-      }
-
-      // 如果有额外信息，添加到描述中
-      if (additionalInfo.length > 0) {
-        if (fullDescription) {
-          fullDescription += "\n\n";
-        }
-        fullDescription += "--- 补充信息 ---\n" + additionalInfo.join("\n");
-      }
-
-      return fullDescription;
-    },
     // onStartTimeConfirm、onEndTimeConfirm 和 onTimeCancel 方法已移除，内置API直接处理
     submitTask() {
       // 检查登录状态
       if (!this.checkLogin()) {
         return;
       }
-
+      this.task.tagId = this.tags.map((tag) => tag.id).join(",");
       // 执行详细表单验证
       if (!this.validateForm()) {
         return;
       }
+      console.log("更新后的task.tagId:", this.task.tagId);
 
       // 构建符合API要求的任务对象
-      // 只包含API接口明确支持的字段
-      console.log(this.task)
-      const taskData = {
-        userId: parseInt(getUserId()), // 确保userId是数字类型
-        taskName: this.task.title.trim(),
-        description: this.buildFullDescription(), // 合并原始描述和额外信息
-        deadline: this.task.deadline.replace(" ", "T"),
-        priority: this.task.priority,
-        // 注意：API接口目前不支持estimatedStartTime、estimatedEndTime、tags、course等字段
-        // 这些信息已合并到description中
-      };
+      // 按照新的数据结构要求包含所有必要字段
+      console.log(this.task);
+
+      // 根据是否为编辑模式构建不同的任务数据
+      const taskData = this.isEditMode
+        ? {
+            // 编辑模式下需要包含taskId
+            taskId: parseInt(this.task.taskId),
+            subjectId: this.task.subjectId ? parseInt(this.task.subjectId) : 0, // 转换为数字类型，默认0
+            tagId: this.task.tagId || "", // 标签ID，逗号分隔的字符串
+            taskName: this.task.title.trim(),
+            description: this.task.description?.trim() || "", // 只使用原始描述，不添加补充信息
+            // 确保日期格式兼容API（使用T分隔符）
+            deadline: this.task.deadline
+              .replace(/[\s\/]/, "T")
+              .replace(/\/([0-9]{2})$/, "-$1"),
+            priority: this.task.priority,
+          }
+        : {
+            // 添加模式下的数据结构
+            userId: parseInt(getUserId()) || 0, // 确保userId是数字类型，默认0
+            subjectId: this.task.subjectId ? parseInt(this.task.subjectId) : 0, // 转换为数字类型，默认0
+            tagId: this.task.tagId || "", // 标签ID，逗号分隔的字符串
+            taskName: this.task.title.trim(),
+            description: this.task.description?.trim() || "", // 只使用原始描述，不添加补充信息
+            // 确保日期格式兼容API（使用T分隔符）
+            deadline: this.task.deadline
+              .replace(/[\s\/]/, "T")
+              .replace(/\/([0-9]{2})$/, "-$1"),
+            remindTime: "", // 暂不设置提醒时间，使用空字符串
+            priority: this.task.priority,
+          };
 
       // 输出日志以便调试
       console.log("提交的任务数据:", taskData);
 
       // 调用真实的API保存任务
       uni.showLoading({
-        title: "创建中...",
+        title: this.isEditMode ? "更新中..." : "创建中...",
       });
 
-      // 调用真实的API保存任务
-      addTask(taskData).then((res) => {
-        uni.hideLoading();
+      // 根据模式调用不同的API
+      const apiCall = this.isEditMode
+        ? updateTask(taskData)
+        : addTask(taskData);
 
-        if (res.code === 200) {
-          // 成功提示
-          uni.showToast({
-            title: "任务创建成功",
-            icon: "success",
-          });
-
-          // 返回上一页并携带新任务数据
-          uni.navigateBack({
-            delta: 1,
-          });
-        }
-      });
-
-      // 非测试模式下调用真实API
-      addTask(taskData)
+      apiCall
         .then((res) => {
           uni.hideLoading();
           console.log("API响应:", res);
 
           if (res.code === 200) {
-            // 返回上一页并携带新任务数据
-            uni.navigateTo('/pages/tasks/tasks');
+            // 根据模式显示不同的成功提示
+            uni.showToast({
+              title: this.isEditMode ? "任务更新成功" : "任务创建成功",
+              icon: "success",
+              duration: 1500,
+              success: () => {
+                // 延迟返回列表页，以便用户看到成功提示
+                setTimeout(() => {
+                  // 返回任务列表页
+                  uni.reLaunch({
+                    url: "/pages/tasks/tasks",
+                  });
+                }, 1500);
+              },
+            });
           } else {
-
             // 显示错误提示
             uni.showToast({
-              title: error.title,
+              title:
+                res.msg || (this.isEditMode ? "更新任务失败" : "创建任务失败"),
               icon: "none",
               duration: 2500,
             });
@@ -417,11 +702,16 @@ export default {
         })
         .catch((error) => {
           uni.hideLoading();
-          console.error("创建任务失败:", error);
+          console.error(
+            this.isEditMode ? "更新任务失败:" : "创建任务失败:",
+            error
+          );
 
           // 显示错误提示
           uni.showToast({
-            title: error,
+            title:
+              error.message ||
+              (this.isEditMode ? "更新任务失败" : "创建任务失败"),
             icon: "none",
             duration: 2500,
           });
@@ -440,57 +730,10 @@ export default {
 
 .add-task-container {
   min-height: 100vh;
-  background-color: #f8f8f8;
+  background-color: #f8faff;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 30rpx 20rpx;
-  background-color: #ffffff;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
-  box-sizing: border-box;
-
-  .back-button {
-    width: 60rpx;
-    height: 60rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .back-icon {
-      font-size: 36rpx;
-      color: #333333;
-    }
-  }
-
-  .page-title {
-    font-size: 36rpx;
-    font-weight: 600;
-    color: #333333;
-  }
-
-  .header-right {
-    width: 60rpx;
-
-    .test-button {
-      padding: 8rpx 16rpx;
-      background-color: #e6f7ff;
-      border-radius: 16rpx;
-      font-size: 20rpx;
-
-      .test-text {
-        color: #1890ff;
-      }
-    }
-  }
 }
 
 .form-scroll {
@@ -733,6 +976,7 @@ export default {
       gap: 12rpx;
       width: 100%;
       box-sizing: border-box;
+      margin-bottom: 16rpx;
 
       .tag-item {
         padding: 8rpx 20rpx;
@@ -743,6 +987,37 @@ export default {
         box-sizing: border-box;
         white-space: nowrap;
       }
+
+      .selected-tag {
+        background-color: #e6f4ff;
+        color: #4a6cf7;
+        display: flex;
+        align-items: center;
+      }
+
+      .tag-close {
+        margin-left: 10rpx;
+        font-size: 30rpx;
+        color: #999;
+      }
+    }
+
+    .tag-add-container {
+      margin-top: 16rpx;
+    }
+
+    .tag-add-btn {
+      background-color: #f0f0f0;
+      color: #666;
+      padding: 10rpx 24rpx;
+      border-radius: 16rpx;
+      font-size: 26rpx;
+      display: inline-block;
+      border: 1rpx dashed #ccc;
+    }
+
+    .subject-selector {
+      width: 100%;
     }
   }
 }
@@ -780,5 +1055,119 @@ button[disabled] {
 input:focus,
 textarea:focus {
   outline: none;
+}
+
+/* 学科选择器样式 */
+:deep(.uni-data-select) {
+  width: 100%;
+}
+
+:deep(.uni-data-select__selector) {
+  border-radius: 30rpx !important;
+  border-color: #e6e6e6 !important;
+  background-color: #fff !important;
+  padding: 0 30rpx !important;
+  height: 80rpx;
+}
+
+// 样式类，与add-note.vue保持一致
+.section-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.subject-selector {
+  margin-bottom: 32rpx;
+}
+
+.selected-subject-info {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 12rpx;
+  display: block;
+}
+
+.tags-section {
+  margin-bottom: 32rpx;
+}
+
+.tag-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 20rpx;
+  background-color: #f0f0f0;
+  border-radius: 30rpx;
+  margin-right: 16rpx;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+
+  .tag-close {
+    margin-left: 8rpx;
+    color: #999;
+    font-size: 32rpx;
+    line-height: 1;
+  }
+}
+
+.tag-add-btn {
+  display: inline-block;
+  padding: 8rpx 20rpx;
+  border: 1px dashed #ccc;
+  border-radius: 30rpx;
+  color: #666;
+  font-size: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.tag-selector-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .tag-selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30rpx;
+    border-bottom: 1px solid #eee;
+
+    .tag-selector-title {
+      font-size: 32rpx;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .tag-selector-close {
+      width: 60rpx;
+      height: 60rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .close-icon {
+        font-size: 40rpx;
+        color: #999;
+      }
+    }
+  }
+
+  .tag-list {
+    overflow-y: auto;
+    padding: 30rpx;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16rpx;
+  }
+
+  .loading-more,
+  .no-more-data {
+    width: 100%;
+    text-align: center;
+    color: #999;
+    font-size: 24rpx;
+    padding: 20rpx 0;
+  }
 }
 </style>

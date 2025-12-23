@@ -1,53 +1,114 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const api_note = require("../../api/note.js");
 const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
       notes: [],
-      isLoading: false
+      isLoading: false,
+      triggered: false,
+      currentPage: 1,
+      pageSize: 10,
+      hasMore: true,
+      searchValue: "",
+      // 搜索关键词
+      debounceTimer: null,
+      // 防抖定时器
+      loadMoreStatus: "more"
+      // 加载更多状态：more(可以加载更多), loading(加载中), noMore(没有更多数据)
     };
   },
+  // 页面加载时执行
   onLoad() {
     this.loadNotes();
   },
+  // 监听滚动到底部事件
+  handleScrollToLower() {
+    if (!this.isLoading && this.hasMore) {
+      this.loadNotes();
+    }
+  },
   methods: {
-    // 加载笔记列表
-    loadNotes() {
-      this.isLoading = true;
-      setTimeout(() => {
-        this.notes = this.generateMockNotes();
-        this.isLoading = false;
-      }, 500);
+    // 下拉刷新处理函数
+    onRefresh() {
+      this.currentPage = 1;
+      this.hasMore = true;
+      this.loadNotes().then(() => {
+        common_vendor.index.stopPullDownRefresh();
+      });
     },
-    // 生成模拟笔记数据
-    generateMockNotes() {
-      return [
-        {
-          id: "1",
-          title: "学习计划",
-          content: "今天需要完成AI学习任务，包括阅读论文、编写代码和总结笔记。重点关注神经网络模型的优化方法和应用场景。",
-          createdAt: (/* @__PURE__ */ new Date()).getTime() - 864e5,
-          updatedAt: (/* @__PURE__ */ new Date()).getTime() - 36e5,
-          tags: ["学习", "计划", "AI"]
-        },
-        {
-          id: "2",
-          title: "项目进度记录",
-          content: "项目开发进度良好，已完成需求分析和系统设计。下一步需要开始前端开发，重点是用户界面的实现和交互逻辑的设计。",
-          createdAt: (/* @__PURE__ */ new Date()).getTime() - 1728e5,
-          updatedAt: (/* @__PURE__ */ new Date()).getTime() - 72e5,
-          tags: ["项目", "进度", "开发"]
-        },
-        {
-          id: "3",
-          title: "会议记录",
-          content: "团队会议讨论了产品迭代计划，确定了下一版本的功能优先级。需要关注用户反馈，优化核心功能体验。",
-          createdAt: (/* @__PURE__ */ new Date()).getTime() - 2592e5,
-          updatedAt: (/* @__PURE__ */ new Date()).getTime() - 2592e5,
-          tags: ["会议", "记录", "团队"]
+    onPulling() {
+      var that = this;
+      if (!this.triggered) {
+        this.triggered = true;
+        setTimeout(() => {
+          that.triggered = false;
+        }, 1e3);
+      }
+    },
+    // 加载笔记列表
+    async loadNotes() {
+      if (!this.hasMore)
+        return;
+      this.isLoading = true;
+      this.loadMoreStatus = "loading";
+      try {
+        const query = {
+          currentPage: this.currentPage,
+          pageSize: this.pageSize,
+          title: this.searchValue
+          // 添加搜索条件
+        };
+        const res = await api_note.getNoteList(query);
+        common_vendor.index.__f__("log", "at pages/notes/notes.vue:176", "笔记列表API返回:", res);
+        const records = res.data && res.data.records ? res.data.records : [];
+        const newNotes = records.map((note) => {
+          const tagIds = note.tagId ? note.tagId.split(",").map((id) => parseInt(id.trim())) : [];
+          const tagNames = note.tagNames || [];
+          const tags = tagIds.map((id, index) => ({
+            id,
+            name: tagNames[index] || "未命名标签"
+          }));
+          return {
+            id: note.noteId,
+            title: note.title,
+            content: this.cleanHtmlContent(note.content),
+            createdAt: new Date(note.createTime).getTime(),
+            updatedAt: new Date(note.updateTime).getTime(),
+            tags,
+            tagNames
+            // 保留原始标签名称数组，兼容模板使用
+          };
+        });
+        if (this.currentPage === 1) {
+          this.notes = newNotes;
+        } else {
+          this.notes = [...this.notes, ...newNotes];
         }
-      ];
+        const total = res.data && res.data.total ? res.data.total : 0;
+        this.hasMore = this.notes.length < total;
+        if (this.hasMore) {
+          this.currentPage++;
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/notes/notes.vue:222", "加载笔记列表失败:", error);
+        common_vendor.index.showToast({
+          title: "加载失败，请重试",
+          icon: "none"
+        });
+        this.loadMoreStatus = "more";
+      } finally {
+        this.isLoading = false;
+        this.loadMoreStatus = this.hasMore ? "more" : "noMore";
+      }
+    },
+    // 清理HTML内容，只保留文本
+    cleanHtmlContent(html) {
+      if (!html)
+        return "";
+      const text = html.replace(/<[^>]+>/g, "");
+      return text.replace(/\s+/g, " ").trim();
     },
     // 查看笔记详情
     viewNoteDetail(noteId) {
@@ -61,12 +122,42 @@ const _sfc_main = {
         url: "/pages/notes/add-note"
       });
     },
-    // 搜索笔记
-    searchNotes() {
-      common_vendor.index.showToast({
-        title: "搜索功能开发中",
-        icon: "none"
-      });
+    // 搜索相关方法
+    search() {
+      this.currentPage = 1;
+      this.hasMore = true;
+      this.loadNotes();
+    },
+    // 输入时触发 - 实现防抖搜索
+    input() {
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+      }
+      this.debounceTimer = setTimeout(() => {
+        this.currentPage = 1;
+        this.hasMore = true;
+        this.loadNotes();
+      }, 500);
+    },
+    // 聚焦时触发
+    focus() {
+    },
+    // 失焦时触发
+    blur() {
+    },
+    // 取消搜索
+    cancel() {
+      this.searchValue = "";
+      this.currentPage = 1;
+      this.hasMore = true;
+      this.loadNotes();
+    },
+    // 清空搜索内容
+    clear() {
+      this.searchValue = "";
+      this.currentPage = 1;
+      this.hasMore = true;
+      this.loadNotes();
     },
     // 格式化日期
     formatDate(timestamp) {
@@ -84,33 +175,78 @@ const _sfc_main = {
     }
   }
 };
+if (!Array) {
+  const _easycom_uni_search_bar2 = common_vendor.resolveComponent("uni-search-bar");
+  const _easycom_uni_tag2 = common_vendor.resolveComponent("uni-tag");
+  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
+  (_easycom_uni_search_bar2 + _easycom_uni_tag2 + _easycom_uni_load_more2)();
+}
+const _easycom_uni_search_bar = () => "../../node-modules/@dcloudio/uni-ui/lib/uni-search-bar/uni-search-bar.js";
+const _easycom_uni_tag = () => "../../uni_modules/uni-tag/components/uni-tag/uni-tag.js";
+const _easycom_uni_load_more = () => "../../node-modules/@dcloudio/uni-ui/lib/uni-load-more/uni-load-more.js";
+if (!Math) {
+  (_easycom_uni_search_bar + _easycom_uni_tag + _easycom_uni_load_more)();
+}
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
-    a: common_vendor.o((...args) => $options.searchNotes && $options.searchNotes(...args)),
-    b: common_assets._imports_0,
-    c: common_vendor.o((...args) => $options.addNote && $options.addNote(...args)),
-    d: common_assets._imports_1,
-    e: $data.notes.length === 0
-  }, $data.notes.length === 0 ? {
-    f: common_assets._imports_2
+    a: common_vendor.o($options.search),
+    b: common_vendor.o($options.blur),
+    c: common_vendor.o($options.focus),
+    d: common_vendor.o($options.input),
+    e: common_vendor.o($options.cancel),
+    f: common_vendor.o($options.clear),
+    g: common_vendor.o(($event) => $data.searchValue = $event),
+    h: common_vendor.p({
+      focus: true,
+      radius: "30",
+      bgColor: "#fff",
+      placeholder: "输入笔记标题",
+      modelValue: $data.searchValue
+    }),
+    i: $data.notes.length === 0 && !$data.isLoading
+  }, $data.notes.length === 0 && !$data.isLoading ? {
+    j: common_assets._imports_0,
+    k: common_vendor.t($data.searchValue ? "未找到相关笔记" : "暂无笔记"),
+    l: common_vendor.t($data.searchValue ? "尝试调整搜索关键词" : "点击右下角添加按钮创建第一条笔记")
   } : {
-    g: common_vendor.f($data.notes, (note, index, i0) => {
+    m: common_vendor.f($data.notes, (note, index, i0) => {
       return {
         a: common_vendor.t(note.title),
-        b: common_vendor.t($options.formatDate(note.createdAt)),
-        c: common_vendor.t($options.truncateText(note.content, 100)),
-        d: common_vendor.f(note.tags, (tag, tagIndex, i1) => {
+        b: common_vendor.f(note.tags, (tag, tagIndex, i1) => {
           return {
-            a: common_vendor.t(tag),
-            b: tagIndex
+            a: tag.id,
+            b: "881add60-1-" + i0 + "-" + i1,
+            c: common_vendor.p({
+              circle: true,
+              customStyle: "background-color: #e6eaff;color:#4A6CF7;border:none",
+              text: tag.name,
+              type: "primary"
+            })
           };
         }),
+        c: common_vendor.t($options.truncateText(note.content, 100)),
+        d: common_vendor.t($options.formatDate(note.createdAt)),
         e: note.id,
         f: common_vendor.o(($event) => $options.viewNoteDetail(note.id), note.id)
       };
     })
   }, {
-    h: common_vendor.o((...args) => $options.addNote && $options.addNote(...args))
+    n: $data.notes.length > 0
+  }, $data.notes.length > 0 ? {
+    o: common_vendor.p({
+      status: $data.loadMoreStatus,
+      ["content-text"]: {
+        contentdown: "下滑加载更多",
+        contentrefresh: "加载中...",
+        contentnomore: "没有更多数据了"
+      }
+    })
+  } : {}, {
+    p: common_vendor.o((...args) => _ctx.handleScrollToLower && _ctx.handleScrollToLower(...args)),
+    q: $data.triggered,
+    r: common_vendor.o((...args) => $options.onRefresh && $options.onRefresh(...args)),
+    s: common_vendor.o((...args) => $options.onPulling && $options.onPulling(...args)),
+    t: common_vendor.o((...args) => $options.addNote && $options.addNote(...args))
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

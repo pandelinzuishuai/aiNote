@@ -3,11 +3,11 @@
     <!-- 个人中心头部 -->
     <view class="header">
       <view class="avatar-container">
-        <image class="avatar" :src="userData.avatar" mode="aspectFill"></image>
+        <image class="avatar" v-if="userData.avatar" :src="userData.avatar" mode="aspectFill"></image>
+        <uni-icons class="avatar" type="contact" size="120" color="#fff" v-else></uni-icons>
       </view>
       <view class="user-info">
-        <text class="user-name">{{userData.name}}</text>
-        <text class="user-desc">{{userData.slogan}}</text>
+        <text class="user-name">{{userData.username}}</text>
       </view>
     </view>
 
@@ -41,14 +41,14 @@
         <text class="section-title">个人信息设置</text>
       </view>
       
-      <view class="setting-item" @click="handleSettingClick('profile')">
+      <view class="setting-item" @click="navigateToProfile">
         <view class="setting-left">
           <text class="setting-icon">👤</text>
           <text class="setting-label">个人资料</text>
         </view>
         <view class="setting-right">
           <text class="setting-desc">修改头像、昵称等信息</text>
-          <text class="setting-arrow">></text>
+          <text class="setting-arrow">&gt;</text>
         </view>
       </view>
       
@@ -160,9 +160,8 @@
           values: [3, 4, 5, 4, 6, 3, 4]
         },
         userData: {
-          name: '学习者',
-          avatar: '../../../static/logo.png',
-          slogan: '学习进步每一天'
+          avatar: null,
+          username: null
         },
         isDarkMode: false,
         notificationEnabled: true,
@@ -265,10 +264,7 @@
       handleSettingClick(type) {
         switch (type) {
           case 'profile':
-            uni.showToast({
-              title: '跳转到个人资料编辑',
-              icon: 'none'
-            });
+            this.navigateToProfile();
             break;
           case 'security':
             uni.showToast({
@@ -296,6 +292,13 @@
             break;
         }
       },
+      
+      // 跳转到个人资料页面
+      navigateToProfile() {
+        uni.navigateTo({
+          url: '/pages/mine/profile'
+        });
+      },
       // 切换深色模式
       toggleDarkMode(e) {
         this.isDarkMode = e.detail.value;
@@ -320,12 +323,13 @@
           icon: 'none'
         });
       },
-      // 模拟加载用户数据
+      // 加载用户数据
       loadUserData() {
         // 从本地存储加载数据，如果没有则使用默认数据
         const savedUser = uni.getStorageSync('userInfo');
         if (savedUser) {
           this.userData = savedUser;
+          console.log(this.userData)
         }
         
         // 加载主题设置
@@ -375,13 +379,15 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.8);
     overflow: hidden;
     margin: 0 auto;
     box-shadow: 0 4px 12px rgba(83, 116, 247, 0.3);
   }
   
   .avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     height: 100%;
   }

@@ -25,7 +25,7 @@
 /* 文章场景相关 */
 .main-container.data-v-1cf27b2a {
   min-height: 100vh;
-  background-color: #f8f8f8;
+  background-color: #F8FAFF;
   padding: 30rpx 20rpx 120rpx;
 }
 .header.data-v-1cf27b2a {
@@ -45,7 +45,6 @@
   align-items: center;
   padding: 10rpx;
   border-radius: 12rpx;
-  background-color: #f5f5f5;
 }
 .header .avatar.data-v-1cf27b2a {
   width: 60rpx;
@@ -126,6 +125,31 @@
 .upcoming-tasks .section-header .section-more.data-v-1cf27b2a {
   font-size: 26rpx;
   color: #5374f7;
+}
+.today-tasks .task-list .empty-state.data-v-1cf27b2a,
+.upcoming-tasks .task-list .empty-state.data-v-1cf27b2a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+  text-align: center;
+}
+.today-tasks .task-list .empty-state .empty-icon.data-v-1cf27b2a,
+.upcoming-tasks .task-list .empty-state .empty-icon.data-v-1cf27b2a {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+.today-tasks .task-list .empty-state .empty-text.data-v-1cf27b2a,
+.upcoming-tasks .task-list .empty-state .empty-text.data-v-1cf27b2a {
+  font-size: 28rpx;
+  color: #333333;
+  margin-bottom: 10rpx;
+}
+.today-tasks .task-list .empty-state .empty-tip.data-v-1cf27b2a,
+.upcoming-tasks .task-list .empty-state .empty-tip.data-v-1cf27b2a {
+  font-size: 24rpx;
+  color: #999999;
 }
 .today-tasks .task-list .task-item.data-v-1cf27b2a,
 .upcoming-tasks .task-list .task-item.data-v-1cf27b2a {

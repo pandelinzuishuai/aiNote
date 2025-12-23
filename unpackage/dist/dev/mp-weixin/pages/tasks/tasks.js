@@ -6,7 +6,7 @@ const _sfc_main = {
     return {
       activeTab: "all",
       triggered: false,
-      sortBy: "priority",
+      currentSortIndex: 0,
       sortOptions: ["按优先级排序", "按截止时间排序", "按创建时间排序"],
       tasks: [],
       // 初始化为空数组，从服务器获取数据
@@ -56,33 +56,27 @@ const _sfc_main = {
       }
     },
     handleSortChange(e) {
-      const index = e.detail.value;
-      if (index === 0)
-        this.sortBy = "priority";
-      else if (index === 1)
-        this.sortBy = "deadline";
-      else if (index === 2)
-        this.sortBy = "created";
+      this.currentSortIndex = e.detail.value;
       this.sortTasks();
     },
     // 前端排序方法
     sortTasks() {
       const sortedTasks = [...this.tasks];
-      switch (this.sortBy) {
-        case "priority":
+      switch (this.currentSortIndex) {
+        case 0:
           sortedTasks.sort((a, b) => {
-            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            const priorityOrder = { 高: 0, 中: 1, 低: 2 };
             return (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3);
           });
           break;
-        case "deadline":
+        case 1:
           sortedTasks.sort((a, b) => {
             return new Date(a.deadline || 0) - new Date(b.deadline || 0);
           });
           break;
-        case "created":
+        case 2:
           sortedTasks.sort((a, b) => {
-            return new Date(b.created || 0) - new Date(a.created || 0);
+            return new Date(b.createTime || 0) - new Date(a.createTime || 0);
           });
           break;
       }
@@ -118,7 +112,7 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/tasks/tasks.vue:286", "更新任务状态失败:", error);
+        common_vendor.index.__f__("error", "at pages/tasks/tasks.vue:284", "更新任务状态失败:", error);
         common_vendor.index.showToast({
           title: "更新任务状态失败",
           icon: "none"
@@ -212,17 +206,20 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     h: common_vendor.o(($event) => $options.changeTab("completed")),
     i: $data.activeTab === "overdue" ? 1 : "",
     j: common_vendor.o(($event) => $options.changeTab("overdue")),
-    k: common_vendor.o((...args) => $options.handleSortChange && $options.handleSortChange(...args)),
-    l: $data.loading
+    k: common_vendor.t($data.sortOptions[$data.currentSortIndex]),
+    l: $data.sortOptions,
+    m: $data.currentSortIndex,
+    n: common_vendor.o((...args) => $options.handleSortChange && $options.handleSortChange(...args)),
+    o: $data.loading
   }, $data.loading ? {} : $data.tasks.length > 0 ? {
-    n: common_vendor.f($data.tasks, (task, index, i0) => {
+    q: common_vendor.f($data.tasks, (task, index, i0) => {
       return common_vendor.e({
         a: common_vendor.t($options.getPriorityText(task.priority)),
         b: common_vendor.n(task.priority),
         c: common_vendor.t($options.formatTime(task.deadline)),
         d: common_vendor.t(task.taskName || "无标题任务"),
         e: common_vendor.t(task.description || "无任务描述"),
-        f: common_vendor.t(task.course || "通用课程"),
+        f: common_vendor.t(task.subjectName || "通用课程"),
         g: common_vendor.n(task.priority),
         h: common_vendor.t($options.getPriorityLabel(task.priority)),
         i: task.hasAttachment
@@ -237,11 +234,11 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
       });
     })
   } : {}, {
-    m: $data.tasks.length > 0,
-    o: $data.triggered,
-    p: common_vendor.o((...args) => $options.onPulling && $options.onPulling(...args)),
-    q: common_vendor.o((...args) => $options.onRefresh && $options.onRefresh(...args)),
-    r: common_vendor.o((...args) => $options.navigateToAddTask && $options.navigateToAddTask(...args))
+    p: $data.tasks.length > 0,
+    r: $data.triggered,
+    s: common_vendor.o((...args) => $options.onPulling && $options.onPulling(...args)),
+    t: common_vendor.o((...args) => $options.onRefresh && $options.onRefresh(...args)),
+    v: common_vendor.o((...args) => $options.navigateToAddTask && $options.navigateToAddTask(...args))
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-027feebf"]]);

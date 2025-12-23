@@ -1,6 +1,34 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const utils_request = require("../utils/request.js");
+async function getTodayTasks(queryParams = {}) {
+  try {
+    const defaultQuery = {
+      currentPage: 1,
+      pageSize: 10
+    };
+    const query = { ...defaultQuery, ...queryParams };
+    const res = await utils_request.http.post("/task/getTodo", query, { needLogin: true });
+    return res;
+  } catch (error) {
+    common_vendor.index.__f__("error", "at api/task.js:23", "获取今日待办任务失败:", error);
+    throw error;
+  }
+}
+async function getUpcomingTasks(queryParams = {}) {
+  try {
+    const defaultQuery = {
+      currentPage: 1,
+      pageSize: 10
+    };
+    const query = { ...defaultQuery, ...queryParams };
+    const res = await utils_request.http.post("/task/getDeadline", query, { needLogin: true });
+    return res;
+  } catch (error) {
+    common_vendor.index.__f__("error", "at api/task.js:46", "获取即将截止任务失败:", error);
+    throw error;
+  }
+}
 async function getTaskList(taskQuery = {}) {
   try {
     const defaultQuery = {
@@ -11,7 +39,7 @@ async function getTaskList(taskQuery = {}) {
     const res = await utils_request.http.post("/task/list", query, { needLogin: true });
     return res;
   } catch (error) {
-    common_vendor.index.__f__("error", "at api/task.js:28", "获取任务列表失败:", error);
+    common_vendor.index.__f__("error", "at api/task.js:74", "获取任务列表失败:", error);
     throw error;
   }
 }
@@ -20,7 +48,7 @@ async function getTaskInfo(id) {
     const res = await utils_request.http.get(`/task/getInfo?id=${encodeURIComponent(id)}`, {}, { needLogin: true });
     return res;
   } catch (error) {
-    common_vendor.index.__f__("error", "at api/task.js:43", "获取任务信息失败:", error);
+    common_vendor.index.__f__("error", "at api/task.js:89", "获取任务信息失败:", error);
     throw error;
   }
 }
@@ -29,7 +57,7 @@ async function addTask(addTaskForm) {
     const res = await utils_request.http.post("/task/add", addTaskForm, { needLogin: true });
     return res;
   } catch (error) {
-    common_vendor.index.__f__("error", "at api/task.js:64", "添加任务失败:", error);
+    common_vendor.index.__f__("error", "at api/task.js:112", "添加任务失败:", error);
     throw error;
   }
 }
@@ -38,7 +66,7 @@ async function updateTask(updateTaskForm) {
     const res = await utils_request.http.put("/task/update", updateTaskForm, { needLogin: true });
     return res;
   } catch (error) {
-    common_vendor.index.__f__("error", "at api/task.js:86", "更新任务失败:", error);
+    common_vendor.index.__f__("error", "at api/task.js:134", "更新任务失败:", error);
     throw error;
   }
 }
@@ -47,7 +75,7 @@ async function deleteTask(id) {
     const res = await utils_request.http.delete(`/task/delete?id=${encodeURIComponent(id)}`, {}, { needLogin: true });
     return res;
   } catch (error) {
-    common_vendor.index.__f__("error", "at api/task.js:101", "删除任务失败:", error);
+    common_vendor.index.__f__("error", "at api/task.js:149", "删除任务失败:", error);
     throw error;
   }
 }
@@ -60,7 +88,7 @@ async function getTasksByIds(ids) {
       data: tasks.map((task) => task.data)
     };
   } catch (error) {
-    common_vendor.index.__f__("error", "at api/task.js:121", "批量获取任务失败:", error);
+    common_vendor.index.__f__("error", "at api/task.js:169", "批量获取任务失败:", error);
     throw error;
   }
 }
@@ -74,7 +102,7 @@ async function updateTaskStatus(taskId, status) {
     });
     return res;
   } catch (error) {
-    common_vendor.index.__f__("error", "at api/task.js:142", "更新任务状态失败:", error);
+    common_vendor.index.__f__("error", "at api/task.js:190", "更新任务状态失败:", error);
     throw error;
   }
 }
@@ -100,7 +128,7 @@ async function getTaskStatistics(userId) {
     }
     throw new Error("获取任务列表失败");
   } catch (error) {
-    common_vendor.index.__f__("error", "at api/task.js:175", "获取任务统计失败:", error);
+    common_vendor.index.__f__("error", "at api/task.js:223", "获取任务统计失败:", error);
     throw error;
   }
 }
@@ -110,6 +138,8 @@ exports.getTaskInfo = getTaskInfo;
 exports.getTaskList = getTaskList;
 exports.getTaskStatistics = getTaskStatistics;
 exports.getTasksByIds = getTasksByIds;
+exports.getTodayTasks = getTodayTasks;
+exports.getUpcomingTasks = getUpcomingTasks;
 exports.updateTask = updateTask;
 exports.updateTaskStatus = updateTaskStatus;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/api/task.js.map

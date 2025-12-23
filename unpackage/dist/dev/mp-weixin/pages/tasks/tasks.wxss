@@ -30,7 +30,7 @@
 }
 .tasks-container.data-v-027feebf {
   min-height: 100vh;
-  background-color: #f8f8f8;
+  background-color: #f8faff;
   padding-bottom: 120rpx;
   box-sizing: border-box;
 }

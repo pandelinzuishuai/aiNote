@@ -9,6 +9,7 @@ const _sfc_main = {
         taskId: "",
         userId: "",
         subjectId: "",
+        subjectName: "",
         taskName: "",
         deadline: "",
         description: "",
@@ -17,7 +18,9 @@ const _sfc_main = {
         status: "待处理",
         // 待处理、进行中、已完成
         createTime: "",
-        finishTime: ""
+        finishTime: "",
+        tagId: "",
+        tagNames: ""
       },
       isLoading: true,
       errorMsg: "",
@@ -82,7 +85,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:245", "删除确认对话框失败:", err);
+          common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:249", "删除确认对话框失败:", err);
         }
       });
     },
@@ -106,7 +109,7 @@ const _sfc_main = {
         this.isLoading = false;
         this.refreshing = false;
         this.errorMsg = error.message || "加载任务失败，请重试";
-        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:278", "Failed to load task:", error);
+        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:282", "Failed to load task:", error);
         if (!this.task.taskId) {
           this.task = this.normalizeTaskData({});
         }
@@ -118,14 +121,24 @@ const _sfc_main = {
         taskId: data.taskId || "",
         userId: data.userId || "",
         subjectId: data.subjectId || "",
+        subjectName: data.subjectName || "",
         taskName: data.taskName || "无标题任务",
         deadline: data.deadline || "",
         description: data.description || "暂无描述",
         priority: data.priority || "中",
         status: data.status || "待处理",
         createTime: data.createTime || "",
-        finishTime: data.finishTime || ""
+        finishTime: data.finishTime || "",
+        tagId: data.tagId || "",
+        tagNames: data.tagNames || ""
       };
+    },
+    // 获取标签列表
+    getTagList() {
+      if (this.task.tagNames) {
+        return typeof this.task.tagNames === "string" ? this.task.tagNames.split(",") : Array.isArray(this.task.tagNames) ? this.task.tagNames : [];
+      }
+      return [];
     },
     // 映射中文状态到英文
     mapStatusToEnglish(status) {
@@ -168,21 +181,8 @@ const _sfc_main = {
           title: error.message || "状态更新失败，请重试",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:355", "Failed to update task status:", error);
+        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:372", "Failed to update task status:", error);
       }
-    },
-    // 返回上一页
-    goBack() {
-      common_vendor.index.__f__("log", "at pages/tasks/task-detail.vue:361", "返回");
-      common_vendor.index.navigateBack({
-        delta: 1,
-        success: function() {
-          const pages = getCurrentPages();
-          const prevPage = pages[pages.length - 2];
-          common_vendor.index.__f__("log", "at pages/tasks/task-detail.vue:367", prevPage);
-          prevPage.onLoad();
-        }
-      });
     },
     // 下拉刷新处理
     onRefresh() {
@@ -197,10 +197,10 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: `/pages/tasks/add-task?id=${this.task.taskId}&edit=true`,
           success: () => {
-            common_vendor.index.__f__("log", "at pages/tasks/task-detail.vue:387", "Navigate to edit task page");
+            common_vendor.index.__f__("log", "at pages/tasks/task-detail.vue:392", "Navigate to edit task page");
           },
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:390", "Failed to navigate:", err);
+            common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:395", "Failed to navigate:", err);
             common_vendor.index.showToast({
               title: "页面跳转失败",
               icon: "none"
@@ -208,7 +208,7 @@ const _sfc_main = {
           }
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:398", "Navigation error:", error);
+        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:403", "Navigation error:", error);
         common_vendor.index.showToast({
           title: "操作失败，请重试",
           icon: "none"
@@ -239,9 +239,9 @@ const _sfc_main = {
             icon: "success",
             duration: 1500,
             success: () => {
-              setTimeout(() => {
-                common_vendor.index.navigateTo("/pages/tasks/tasks");
-              }, 1e3);
+              common_vendor.index.reLaunch({
+                url: "/pages/tasks/tasks"
+              });
             }
           });
         } else {
@@ -253,7 +253,7 @@ const _sfc_main = {
           title: error.message || "删除失败，请重试",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:453", "删除任务失败:", error);
+        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:458", "删除任务失败:", error);
       }
     },
     // 格式化时间显示
@@ -294,7 +294,7 @@ const _sfc_main = {
           return `${year}-${month}-${day} ${time}`;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:501", "Time format error:", error);
+        common_vendor.index.__f__("error", "at pages/tasks/task-detail.vue:506", "Time format error:", error);
         return "--";
       }
     },
@@ -325,53 +325,73 @@ const _sfc_main = {
   onHide() {
   }
 };
+if (!Array) {
+  const _easycom_uni_tag2 = common_vendor.resolveComponent("uni-tag");
+  _easycom_uni_tag2();
+}
+const _easycom_uni_tag = () => "../../uni_modules/uni-tag/components/uni-tag/uni-tag.js";
+if (!Math) {
+  _easycom_uni_tag();
+}
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
-    a: common_assets._imports_0$1,
-    b: common_vendor.o((...args) => $options.goBack && $options.goBack(...args)),
-    c: $options.loading
+    a: $options.loading
   }, $options.loading ? {} : $options.error ? {
-    e: common_assets._imports_1$1,
-    f: common_vendor.t($options.error),
-    g: common_vendor.o((...args) => $options.reloadTask && $options.reloadTask(...args))
+    c: common_assets._imports_0$2,
+    d: common_vendor.t($options.error),
+    e: common_vendor.o((...args) => $options.reloadTask && $options.reloadTask(...args))
   } : common_vendor.e({
-    h: common_vendor.t($data.task.taskName || "无标题任务"),
-    i: common_vendor.t($data.task.status || "未开始"),
-    j: common_vendor.n($options.mapStatusToEnglish($data.task.status)),
-    k: common_vendor.t($data.task.description || "暂无描述"),
-    l: common_assets._imports_2$1,
-    m: common_vendor.t($data.task.priority || "中"),
-    n: common_vendor.n(`priority-${$options.getPriorityLevel($data.task.priority)}`),
-    o: common_assets._imports_3,
-    p: common_vendor.t($data.task.deadline ? $options.formatTime($data.task.deadline) : "未设置"),
-    q: $options.isOverdue && $data.task.status !== "已完成" ? 1 : "",
-    r: $options.daysRemaining
+    f: common_vendor.t($data.task.taskName || "无标题任务"),
+    g: common_vendor.t($data.task.status || "未开始"),
+    h: common_vendor.n($options.mapStatusToEnglish($data.task.status)),
+    i: common_vendor.t($data.task.description || "暂无描述"),
+    j: common_assets._imports_1,
+    k: common_vendor.t($data.task.priority || "中"),
+    l: common_vendor.n(`priority-${$options.getPriorityLevel($data.task.priority)}`),
+    m: common_assets._imports_2,
+    n: common_vendor.t($data.task.deadline.replace("T", " ") || "未设置"),
+    o: $options.isOverdue && $data.task.status !== "已完成" ? 1 : "",
+    p: $options.daysRemaining
   }, $options.daysRemaining ? {
-    s: common_vendor.t($options.daysRemaining),
-    t: $options.isOverdue ? 1 : ""
+    q: common_vendor.t($options.daysRemaining),
+    r: $options.isOverdue ? 1 : ""
   } : {}, {
-    v: common_assets._imports_3,
-    w: common_vendor.t($data.task.createTime ? $options.formatTime($data.task.createTime) : "未知"),
-    x: $data.task.status === "已完成"
+    s: common_assets._imports_2,
+    t: common_vendor.t($data.task.createTime.replace("T", " ")),
+    v: $data.task.status === "已完成"
   }, $data.task.status === "已完成" ? {
-    y: common_assets._imports_3,
-    z: common_vendor.t($data.task.finishTime ? $options.formatTime($data.task.finishTime) : "未知")
+    w: common_assets._imports_2,
+    x: common_vendor.t($data.task.finishTime.replace("T", " "))
   } : {}, {
-    A: common_assets._imports_4,
-    B: common_vendor.t($data.task.userId || "未知"),
-    C: common_assets._imports_5,
-    D: common_vendor.t($data.task.subjectId || "未分配"),
-    E: $data.task.status !== "已完成"
+    y: common_assets._imports_3,
+    z: common_vendor.t($data.task.subjectName || ($data.task.subjectId ? "未命名学科" : "未分配")),
+    A: $data.task.tagNames || $data.task.tagId
+  }, $data.task.tagNames || $data.task.tagId ? {
+    B: common_assets._imports_3,
+    C: common_vendor.f($options.getTagList(), (tag, index, i0) => {
+      return {
+        a: index,
+        b: "ea666fbd-0-" + i0,
+        c: common_vendor.p({
+          circle: true,
+          customStyle: "background-color: #e6eaff;color:#4A6CF7;border:none",
+          text: tag,
+          type: "primary"
+        })
+      };
+    })
+  } : {}, {
+    D: $data.task.status !== "已完成"
   }, $data.task.status !== "已完成" ? {
-    F: common_vendor.o(($event) => $options.updateTaskStatus("已完成"))
+    E: common_vendor.o(($event) => $options.updateTaskStatus("已完成"))
   } : {
-    G: common_vendor.o(($event) => $options.updateTaskStatus("未完成"))
+    F: common_vendor.o(($event) => $options.updateTaskStatus("未完成"))
   }, {
-    H: common_vendor.o((...args) => $options.editTask && $options.editTask(...args)),
-    I: common_vendor.o((...args) => $options.showDeleteConfirm && $options.showDeleteConfirm(...args)),
-    J: common_vendor.o((...args) => $options.onRefresh && $options.onRefresh(...args))
+    G: common_vendor.o((...args) => $options.editTask && $options.editTask(...args)),
+    H: common_vendor.o((...args) => $options.showDeleteConfirm && $options.showDeleteConfirm(...args)),
+    I: common_vendor.o((...args) => $options.onRefresh && $options.onRefresh(...args))
   }), {
-    d: $options.error
+    b: $options.error
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-ea666fbd"]]);

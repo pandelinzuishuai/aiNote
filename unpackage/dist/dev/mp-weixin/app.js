@@ -7,10 +7,13 @@ if (!Math) {
   "./pages/login/login.js";
   "./pages/register/register.js";
   "./pages/notes/notes.js";
+  "./pages/notes/add-note.js";
+  "./pages/notes/note-detail.js";
   "./pages/tasks/tasks.js";
   "./pages/tasks/add-task.js";
   "./pages/tasks/task-detail.js";
   "./pages/mine/mine.js";
+  "./pages/mine/profile.js";
 }
 const _sfc_main = {
   onLaunch: function() {

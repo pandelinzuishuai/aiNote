@@ -1,15 +1,23 @@
 
 .container {
+  height: 100vh;
+  background-color: #f8faff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 内容滚动区域 */
+.content-scroll {
   flex: 1;
-  background-color: #f8f8f8;
-  padding-bottom: 80rpx;
+  height: calc(100vh - 100rpx);
+  overflow-y: auto;
 }
 
 /* 导航栏样式 */
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   padding: 20rpx 30rpx;
   background-color: #ffffff;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
@@ -22,6 +30,7 @@
   font-size: 36rpx;
   font-weight: bold;
   color: #333333;
+  margin-bottom: 20rpx;
 }
 .header-actions {
   display: flex;
@@ -41,6 +50,8 @@
   background-color: #ffffff;
   border-radius: 16rpx;
   padding: 30rpx;
+
+  margin: 0 20rpx;
   margin-bottom: 20rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
   transition: transform 0.2s;
@@ -70,10 +81,19 @@
   color: #666666;
   line-height: 44rpx;
   margin-bottom: 20rpx;
+  overflow-x:hidden;
+  text-overflow: ellipsis;
+}
+.note-label {
+  display: flex;
+  flex-wrap: wrap;
+}
+.note-tag {
+  margin: 0 12rpx 25rpx 0;
 }
 .note-footer {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 .note-tags {
   font-size: 24rpx;
@@ -130,4 +150,11 @@
   color: #ffffff;
   line-height: 1;
   margin-top: -8rpx;
+}
+
+/* 加载更多容器样式 */
+.load-more-container {
+  padding: 20rpx 0 30rpx;
+  display: flex;
+  justify-content: center;
 }

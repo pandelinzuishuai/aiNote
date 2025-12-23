@@ -10,45 +10,10 @@
 .container.data-v-ea666fbd {
   position: relative;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #F8FAFF;
   width: 100%;
   box-sizing: border-box;
 }
-
-/* 导航栏样式 */
-.nav-bar.data-v-ea666fbd {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 44px;
-  background-color: #fff;
-  padding: 0 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  width: 100%;
-  box-sizing: border-box;
-}
-.nav-left.data-v-ea666fbd,
-.nav-right.data-v-ea666fbd {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.nav-left image.data-v-ea666fbd {
-  width: 20px;
-  height: 20px;
-}
-.nav-title.data-v-ea666fbd {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: calc(100% - 80px);
-}
-
 /* 加载状态样式 */
 .loading-container.data-v-ea666fbd {
   display: flex;
@@ -253,6 +218,30 @@
 .priority-normal.data-v-ea666fbd {
   background-color: #f0f0f0;
   color: #999;
+}
+
+/* 标签样式 */
+.tag-item.data-v-ea666fbd {
+  align-items: flex-start;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.tags-container.data-v-ea666fbd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+.tag-badge.data-v-ea666fbd {
+  background-color: #f0f7ff;
+  color: #4096ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
 }
 
 /* 操作按钮样式 */

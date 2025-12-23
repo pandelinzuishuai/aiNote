@@ -99,7 +99,7 @@ const _sfc_main = {
           icon: "success"
         });
         setTimeout(() => {
-          common_vendor.index.switchTab({
+          common_vendor.index.reLaunch({
             url: "/pages/index/index"
           });
         }, 1e3);
@@ -138,7 +138,7 @@ const _sfc_main = {
 };
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
-    a: common_assets._imports_2,
+    a: common_assets._imports_0,
     b: $data.loginForm.username,
     c: common_vendor.o(($event) => $data.loginForm.username = $event.detail.value),
     d: $data.loginForm.password,

@@ -26,14 +26,29 @@
 		{
 			"path": "pages/notes/notes",
 			"style": {
-				"navigationBarTitleText": "笔记",
+				"navigationBarTitleText": "我的笔记",
+				"enablePullDownRefresh": true,
+				"navigationBarHidden": true
+			}
+		},
+		{
+			"path": "pages/notes/add-note",
+			"style": {
+				"navigationBarTitleText": "创建笔记",
+				"navigationBarHidden": true
+			}
+		},
+		{
+			"path": "pages/notes/note-detail",
+			"style": {
+				"navigationBarTitleText": "笔记详情",
 				"navigationBarHidden": true
 			}
 		},
 		{
 			"path": "pages/tasks/tasks",
 			"style": {
-				"navigationBarTitleText": "任务",
+				"navigationBarTitleText": "任务管理",
 				"navigationBarHidden": true
 			}
 		},
@@ -56,6 +71,12 @@
 			"style": {
 				"navigationBarTitleText": "我的",
 				"navigationBarHidden": true
+			}
+		},
+		{
+			"path": "pages/mine/profile",
+			"style": {
+				"navigationBarTitleText": "个人资料"
 			}
 		}
 	],
@@ -97,5 +118,11 @@
 			}
 		]
 	},
-	"uniIdRouter": {}
+	"uniIdRouter": {},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+		}
+	}
 }

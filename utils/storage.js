@@ -66,6 +66,9 @@ export function setUserInfo(userInfo) {
 export function getUserInfo() {
   try {
     const userInfo = uni.getStorageSync(STORAGE_KEYS.USER_INFO);
+    if (!userInfo) {
+      return JSON.parse(userInfo);
+    }
     console.log('userInfo', userInfo)
     return userInfo;
   } catch (e) {

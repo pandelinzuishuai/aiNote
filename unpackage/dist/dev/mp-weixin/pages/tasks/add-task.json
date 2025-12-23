@@ -2,6 +2,9 @@
   "navigationBarTitleText": "创建任务",
   "navigationBarHidden": true,
   "usingComponents": {
-    "uni-datetime-picker": "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker"
+    "uni-data-select": "../../node-modules/@dcloudio/uni-ui/lib/uni-data-select/uni-data-select",
+    "uni-datetime-picker": "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker",
+    "uni-tag": "../../uni_modules/uni-tag/components/uni-tag/uni-tag",
+    "uni-drawer": "../../node-modules/@dcloudio/uni-ui/lib/uni-drawer/uni-drawer"
   }
 }

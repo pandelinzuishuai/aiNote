@@ -1,14 +1,5 @@
 <template>
   <view class="container page-container">
-    <!-- 顶部导航栏 -->
-    <view class="nav-bar">
-      <view class="nav-left" @tap="goBack">
-        <image src="/static/icons/back.png" mode="aspectFit"></image>
-      </view>
-      <view class="nav-title">任务详情</view>
-      <view class="nav-right"></view>
-    </view>
-
     <!-- 加载状态 -->
     <view v-if="loading" class="loading-container">
       <view class="loading-spinner"></view>
@@ -82,7 +73,7 @@
               class="info-value"
               :class="{ overdue: isOverdue && task.status !== '已完成' }"
             >
-              {{ task.deadline ? formatTime(task.deadline) : "未设置" }}
+              {{ task.deadline.replace("T", " ") || "未设置" }}
             </text>
             <view
               v-if="daysRemaining"
@@ -102,7 +93,7 @@
             ></image>
             <text class="info-label">创建时间</text>
             <text class="info-value">{{
-              task.createTime ? formatTime(task.createTime) : "未知"
+              task.createTime.replace("T", " ")
             }}</text>
           </view>
 
@@ -115,30 +106,40 @@
             ></image>
             <text class="info-label">完成时间</text>
             <text class="info-value">{{
-              task.finishTime ? formatTime(task.finishTime) : "未知"
+              task.finishTime.replace("T", " ")
             }}</text>
           </view>
 
-          <!-- 用户ID -->
-          <view class="info-item">
-            <image
-              class="info-icon"
-              src="/static/icons/user.svg"
-              mode="aspectFit"
-            ></image>
-            <text class="info-label">用户ID</text>
-            <text class="info-value">{{ task.userId || "未知" }}</text>
-          </view>
-
-          <!-- 学科ID -->
+          <!-- 学科信息 -->
           <view class="info-item">
             <image
               class="info-icon"
               src="/static/icons/category.svg"
               mode="aspectFit"
             ></image>
-            <text class="info-label">学科ID</text>
-            <text class="info-value">{{ task.subjectId || "未分配" }}</text>
+            <text class="info-label">学科</text>
+            <text class="info-value">{{ task.subjectName || (task.subjectId ? '未命名学科' : '未分配') }}</text>
+          </view>
+          
+          <!-- 标签信息 -->
+          <view v-if="task.tagNames || task.tagId" class="info-item tag-item">
+            <image
+              class="info-icon"
+              src="/static/icons/category.svg"
+              mode="aspectFit"
+            ></image>
+            <text class="info-label">标签</text>
+            <view class="tags-container">
+              <uni-tag
+              class="note-tag"
+              circle
+              customStyle="background-color: #e6eaff;color:#4A6CF7;border:none"
+              :text="tag"
+              v-for="(tag, index) in getTagList()"
+              :key="index"
+              type="primary"
+            ></uni-tag>
+            </view>
           </view>
         </view>
       </view>
@@ -172,6 +173,7 @@ export default {
         taskId: "",
         userId: "",
         subjectId: "",
+        subjectName: "",
         taskName: "",
         deadline: "",
         description: "",
@@ -179,6 +181,8 @@ export default {
         status: "待处理", // 待处理、进行中、已完成
         createTime: "",
         finishTime: "",
+        tagId: "",
+        tagNames: "",
       },
       isLoading: true,
       errorMsg: "",
@@ -291,6 +295,7 @@ export default {
         taskId: data.taskId || "",
         userId: data.userId || "",
         subjectId: data.subjectId || "",
+        subjectName: data.subjectName || "",
         taskName: data.taskName || "无标题任务",
         deadline: data.deadline || "",
         description: data.description || "暂无描述",
@@ -298,7 +303,19 @@ export default {
         status: data.status || "待处理",
         createTime: data.createTime || "",
         finishTime: data.finishTime || "",
+        tagId: data.tagId || "",
+        tagNames: data.tagNames || "",
       };
+    },
+    
+    // 获取标签列表
+    getTagList() {
+      if (this.task.tagNames) {
+        return typeof this.task.tagNames === 'string' ? 
+          this.task.tagNames.split(',') : 
+          (Array.isArray(this.task.tagNames) ? this.task.tagNames : []);
+      }
+      return [];
     },
 
     // 映射中文状态到英文
@@ -356,19 +373,7 @@ export default {
       }
     },
 
-    // 返回上一页
-    goBack() {
-      console.log("返回")
-      uni.navigateBack({
-        delta: 1,
-        success: function () {
-          const pages = getCurrentPages(); //获取当前页面栈
-          const prevPage = pages[pages.length - 2]; //获取上一个页面实例对象
-          console.log(prevPage)
-          prevPage.onLoad(); //调用上一个页面的onLoad方法
-        },
-      });
-    },
+
 
     // 下拉刷新处理
     onRefresh() {
@@ -436,9 +441,9 @@ export default {
             duration: 1500,
             success: () => {
               // 删除成功后返回上一页
-              setTimeout(() => {
-                uni.navigateTo("/pages/tasks/tasks");
-              }, 1000);
+              uni.reLaunch({
+                url: "/pages/tasks/tasks",
+              });
             },
           });
         } else {
@@ -550,48 +555,10 @@ export default {
 .container {
   position: relative;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #F8FAFF;
   width: 100%;
   box-sizing: border-box;
 }
-
-/* 导航栏样式 */
-.nav-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 44px;
-  background-color: #fff;
-  padding: 0 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.nav-left,
-.nav-right {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-left image {
-  width: 20px;
-  height: 20px;
-}
-
-.nav-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: calc(100% - 80px);
-}
-
 /* 加载状态样式 */
 .loading-container {
   display: flex;
@@ -816,6 +783,32 @@ export default {
 .priority-normal {
   background-color: #f0f0f0;
   color: #999;
+}
+
+/* 标签样式 */
+.tag-item {
+  align-items: flex-start;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+
+.tag-badge {
+  background-color: #f0f7ff;
+  color: #4096ff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
 }
 
 /* 操作按钮样式 */

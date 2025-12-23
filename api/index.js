@@ -6,6 +6,21 @@ import * as userAPIImport from './user';
 // 导入任务相关接口
 import * as taskAPIImport from './task';
 
+// 导入标签相关接口
+import * as tagAPIImport from './tag';
+
+// 导入笔记相关接口
+import * as noteAPIImport from './note';
+
+// 导入复习计划相关接口
+import * as reviewScheduleAPIImport from './reviewSchedule';
+
+// 导入MinIO文件上传相关接口
+import * as minioAPIImport from './minio';
+
+// 导入OCR相关接口
+import ocrAPIImport from './ocr';
+
 // 导入网络请求工具
 import { http, getToken, setToken, clearToken, isLoggedIn } from '../utils/request';
 
@@ -33,6 +48,36 @@ export const API = {
     updateStatus: taskAPIImport.updateTaskStatus,
     getStatistics: taskAPIImport.getTaskStatistics
   },
+  // 标签相关API
+  tag: {
+    getList: tagAPIImport.getTagList,
+    getInfo: tagAPIImport.getTagInfo,
+    add: tagAPIImport.addTag,
+    update: tagAPIImport.updateTag,
+    delete: tagAPIImport.deleteTag
+  },
+  // 笔记相关API
+  note: {
+    getList: noteAPIImport.getNoteList,
+    getInfo: noteAPIImport.getNoteInfo,
+    add: noteAPIImport.addNote,
+    update: noteAPIImport.updateNote,
+    delete: noteAPIImport.deleteNote,
+    getReviewList: noteAPIImport.getReviewNotes,
+    exportPdf: noteAPIImport.exportNoteToPdf
+  },
+  // 复习计划相关API
+  reviewSchedule: {
+    update: reviewScheduleAPIImport.updateReviewSchedule
+  },
+  // MinIO文件上传相关API
+  minio: {
+    uploadFile: minioAPIImport.uploadFile,
+    deleteFile: minioAPIImport.deleteFile,
+    uploadMultipleFiles: minioAPIImport.uploadMultipleFiles
+  },
+  // OCR相关API
+  ocr: ocrAPIImport,
   // 工具函数
   utils: {
     http,
@@ -49,6 +94,11 @@ export default API;
 // 直接导出常用API，方便使用
 export const userAPI = API.user;
 export const taskAPI = API.task;
+export const tagAPI = API.tag;
+export const noteAPI = API.note;
+export const reviewScheduleAPI = API.reviewSchedule;
+export const minioAPI = API.minio;
+export const ocrAPI = API.ocr;
 export const apiUtils = API.utils;
 
 /**

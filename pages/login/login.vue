@@ -193,7 +193,7 @@ export default {
 
         setTimeout(() => {
           // 登录成功后跳转到首页
-          uni.switchTab({
+          uni.reLaunch({
             url: "/pages/index/index",
           });
         }, 1000);

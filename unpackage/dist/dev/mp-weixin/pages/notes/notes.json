@@ -1,5 +1,10 @@
 {
-  "navigationBarTitleText": "笔记",
+  "navigationBarTitleText": "我的笔记",
+  "enablePullDownRefresh": true,
   "navigationBarHidden": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "uni-search-bar": "../../node-modules/@dcloudio/uni-ui/lib/uni-search-bar/uni-search-bar",
+    "uni-tag": "../../uni_modules/uni-tag/components/uni-tag/uni-tag",
+    "uni-load-more": "../../node-modules/@dcloudio/uni-ui/lib/uni-load-more/uni-load-more"
+  }
 }

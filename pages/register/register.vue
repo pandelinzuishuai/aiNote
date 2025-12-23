@@ -295,7 +295,7 @@ export default {
           email: this.registerForm.email,
           code: this.registerForm.code,
           password: this.registerForm.password,
-          permId:0
+          permId:1 
         });
         
         if (result.code === 200) {
@@ -404,6 +404,7 @@ export default {
 }
 
 .register-content {
+  width: auto;
   flex: 1;
   padding: 40rpx 30rpx;
   overflow-y: auto;

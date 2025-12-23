@@ -1,9 +1,5 @@
 <template>
   <view class="tasks-container page-container">
-    <view class="header">
-      <text class="page-title">任务管理</text>
-    </view>
-
     <view class="filter-tabs">
       <view
         class="tab"
@@ -45,12 +41,12 @@
     <view class="sort-container">
       <picker
         class="sort-picker"
-        mode="selector"
-        range="{{sortOptions}}"
+        :range="sortOptions"
+        :value="currentSortIndex"
         @change="handleSortChange"
       >
         <view class="sort-text">
-          按优先级排序
+          {{ sortOptions[currentSortIndex] }}
           <text class="sort-icon">▼</text>
         </view>
       </picker>
@@ -93,7 +89,9 @@
             <text class="task-description">{{
               task.description || "无任务描述"
             }}</text>
-            <text class="task-course">{{ task.course || "通用课程" }}</text>
+            <text class="task-course">{{
+              task.subjectName || "通用课程"
+            }}</text>
           </view>
 
           <view class="task-footer">
@@ -152,7 +150,7 @@ export default {
     return {
       activeTab: "all",
       triggered: false,
-      sortBy: "priority",
+      currentSortIndex: 0,
       sortOptions: ["按优先级排序", "按截止时间排序", "按创建时间排序"],
       tasks: [], // 初始化为空数组，从服务器获取数据
       loading: false, // 添加加载状态
@@ -161,10 +159,12 @@ export default {
       pageSize: 20, // 每页大小
     };
   },
+
   onLoad() {
     // 页面加载时获取任务列表
     this.fetchTasksList();
   },
+
   methods: {
     // 获取任务列表的方法
     async fetchTasksList() {
@@ -206,11 +206,8 @@ export default {
       }
     },
     handleSortChange(e) {
-      const index = e.detail.value;
-      if (index === 0) this.sortBy = "priority";
-      else if (index === 1) this.sortBy = "deadline";
-      else if (index === 2) this.sortBy = "created";
-
+      this.currentSortIndex = e.detail.value;
+      
       // 排序后不需要重新请求，直接在前端排序
       this.sortTasks();
     },
@@ -218,27 +215,28 @@ export default {
     sortTasks() {
       const sortedTasks = [...this.tasks];
 
-      switch (this.sortBy) {
-        case "priority":
+      switch (this.currentSortIndex) {
+        case 0: // 按优先级排序
           // 优先级排序：高 > 中 > 低
           sortedTasks.sort((a, b) => {
-            const priorityOrder = { high: 0, medium: 1, low: 2 };
+            // 使用中文键名匹配数据
+            const priorityOrder = { 高: 0, 中: 1, 低: 2 };
             return (
               (priorityOrder[a.priority] || 3) -
               (priorityOrder[b.priority] || 3)
             );
           });
           break;
-        case "deadline":
+        case 1: // 按截止时间排序
           // 截止时间排序
           sortedTasks.sort((a, b) => {
             return new Date(a.deadline || 0) - new Date(b.deadline || 0);
           });
           break;
-        case "created":
+        case 2: // 按创建时间排序
           // 创建时间排序（假设字段名）
           sortedTasks.sort((a, b) => {
-            return new Date(b.created || 0) - new Date(a.created || 0); // 最新的在前
+            return new Date(b.createTime || 0) - new Date(a.createTime || 0); // 最新的在前
           });
           break;
       }
@@ -400,7 +398,7 @@ export default {
 
 .tasks-container {
   min-height: 100vh;
-  background-color: #f8f8f8;
+  background-color: #f8faff;
   padding-bottom: 120rpx;
   box-sizing: border-box;
 }
@@ -485,7 +483,7 @@ export default {
   min-height: 600rpx;
   width: 100%;
   box-sizing: border-box;
-  flex:1;
+  flex: 1;
 }
 
 .task-card {

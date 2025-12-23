@@ -1,6 +1,11 @@
 "use strict";
 const api_user = require("./user.js");
 const api_task = require("./task.js");
+const api_tag = require("./tag.js");
+const api_note = require("./note.js");
+const api_reviewSchedule = require("./reviewSchedule.js");
+const api_minio = require("./minio.js");
+const api_ocr = require("./ocr.js");
 const utils_request = require("../utils/request.js");
 const API = {
   // 用户相关API
@@ -25,6 +30,36 @@ const API = {
     updateStatus: api_task.updateTaskStatus,
     getStatistics: api_task.getTaskStatistics
   },
+  // 标签相关API
+  tag: {
+    getList: api_tag.getTagList,
+    getInfo: api_tag.getTagInfo,
+    add: api_tag.addTag,
+    update: api_tag.updateTag,
+    delete: api_tag.deleteTag
+  },
+  // 笔记相关API
+  note: {
+    getList: api_note.getNoteList,
+    getInfo: api_note.getNoteInfo,
+    add: api_note.addNote,
+    update: api_note.updateNote,
+    delete: api_note.deleteNote,
+    getReviewList: api_note.getReviewNotes,
+    exportPdf: api_note.exportNoteToPdf
+  },
+  // 复习计划相关API
+  reviewSchedule: {
+    update: api_reviewSchedule.updateReviewSchedule
+  },
+  // MinIO文件上传相关API
+  minio: {
+    uploadFile: api_minio.uploadFile,
+    deleteFile: api_minio.deleteFile,
+    uploadMultipleFiles: api_minio.uploadMultipleFiles
+  },
+  // OCR相关API
+  ocr: api_ocr.ocrAPI,
   // 工具函数
   utils: {
     http: utils_request.http,

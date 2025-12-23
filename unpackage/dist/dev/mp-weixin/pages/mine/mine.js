@@ -9,9 +9,8 @@ const _sfc_main = {
         values: [3, 4, 5, 4, 6, 3, 4]
       },
       userData: {
-        name: "学习者",
-        avatar: "../../../static/logo.png",
-        slogan: "学习进步每一天"
+        avatar: null,
+        username: null
       },
       isDarkMode: false,
       notificationEnabled: true,
@@ -92,10 +91,7 @@ const _sfc_main = {
     handleSettingClick(type) {
       switch (type) {
         case "profile":
-          common_vendor.index.showToast({
-            title: "跳转到个人资料编辑",
-            icon: "none"
-          });
+          this.navigateToProfile();
           break;
         case "security":
           common_vendor.index.showToast({
@@ -123,6 +119,12 @@ const _sfc_main = {
           break;
       }
     },
+    // 跳转到个人资料页面
+    navigateToProfile() {
+      common_vendor.index.navigateTo({
+        url: "/pages/mine/profile"
+      });
+    },
     // 切换深色模式
     toggleDarkMode(e) {
       this.isDarkMode = e.detail.value;
@@ -146,11 +148,12 @@ const _sfc_main = {
         icon: "none"
       });
     },
-    // 模拟加载用户数据
+    // 加载用户数据
     loadUserData() {
       const savedUser = common_vendor.index.getStorageSync("userInfo");
       if (savedUser) {
         this.userData = savedUser;
+        common_vendor.index.__f__("log", "at pages/mine/mine.vue:332", this.userData);
       }
       const savedTheme = common_vendor.index.getStorageSync("themeColor");
       if (savedTheme) {
@@ -173,19 +176,35 @@ const _sfc_main = {
     this.loadUserData();
   }
 };
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return {
-    a: $data.userData.avatar,
-    b: common_vendor.t($data.userData.name),
-    c: common_vendor.t($data.userData.slogan),
-    d: common_vendor.o(($event) => $options.handleSettingClick("profile")),
-    e: common_vendor.o(($event) => $options.handleSettingClick("security")),
-    f: $data.notificationEnabled,
-    g: common_vendor.o((...args) => $options.toggleNotification && $options.toggleNotification(...args)),
-    h: common_vendor.o(($event) => $options.handleSettingClick("language")),
-    i: $data.isDarkMode,
-    j: common_vendor.o((...args) => $options.toggleDarkMode && $options.toggleDarkMode(...args)),
-    k: common_vendor.f($data.themeColors, (color, index, i0) => {
+  return common_vendor.e({
+    a: $data.userData.avatar
+  }, $data.userData.avatar ? {
+    b: $data.userData.avatar
+  } : {
+    c: common_vendor.p({
+      type: "contact",
+      size: "120",
+      color: "#fff"
+    })
+  }, {
+    d: common_vendor.t($data.userData.username),
+    e: common_vendor.o((...args) => $options.navigateToProfile && $options.navigateToProfile(...args)),
+    f: common_vendor.o(($event) => $options.handleSettingClick("security")),
+    g: $data.notificationEnabled,
+    h: common_vendor.o((...args) => $options.toggleNotification && $options.toggleNotification(...args)),
+    i: common_vendor.o(($event) => $options.handleSettingClick("language")),
+    j: $data.isDarkMode,
+    k: common_vendor.o((...args) => $options.toggleDarkMode && $options.toggleDarkMode(...args)),
+    l: common_vendor.f($data.themeColors, (color, index, i0) => {
       return {
         a: index,
         b: $data.selectedThemeIndex === index ? 1 : "",
@@ -193,10 +212,10 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         d: common_vendor.o(($event) => $options.selectTheme(index), index)
       };
     }),
-    l: common_vendor.o(($event) => $options.handleSettingClick("help")),
-    m: common_vendor.o(($event) => $options.handleSettingClick("about")),
-    n: common_vendor.o((...args) => $options.logout && $options.logout(...args))
-  };
+    m: common_vendor.o(($event) => $options.handleSettingClick("help")),
+    n: common_vendor.o(($event) => $options.handleSettingClick("about")),
+    o: common_vendor.o((...args) => $options.logout && $options.logout(...args))
+  });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-7c2ebfa5"]]);
 wx.createPage(MiniProgramPage);

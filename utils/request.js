@@ -2,8 +2,8 @@
 
 // API基础URL
 // const BASE_URL = 'http://192.168.249.197:8080';//杨家标热点
-const BASE_URL = 'http://192.168.43.150:8080';//潘德林热点
-// const BASE_URL = 'http://139.9.179.161:8088';//服务器ip
+// const BASE_URL = 'http://192.168.43.150:8088';//潘德林热点
+const BASE_URL = 'http://139.9.179.161:8088';//服务器ip
 
 // 请求超时时间
 const TIMEOUT = 30000;

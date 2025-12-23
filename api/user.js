@@ -32,7 +32,7 @@ export async function userLogin(loginForm) {
  * @param {string} registerForm.password - 密码
  * @param {string} registerForm.email - 邮箱
  * @param {string} registerForm.code - 验证码
- * @param {number} [registerForm.permId=0] - 权限ID（可选）
+ * @param {number} [registerForm.permId=1] - 权限ID（可选）
  * @returns {Promise} 返回注册结果
  */
 export async function userRegister(registerForm) {
@@ -98,7 +98,7 @@ export async function updateUserInfo(updateUserForm) {
     // 更新本地存储的用户信息
     if (res.data) {
       const currentUserInfo = uni.getStorageSync('userInfo') || {};
-      uni.setStorageSync('userInfo', { ...currentUserInfo, ...updateUserForm });
+      uni.setStorageSync('userInfo', updateUserForm);
     }
     return res;
   } catch (error) {

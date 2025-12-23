@@ -3,6 +3,52 @@
 import { http } from '../utils/request';
 
 /**
+ * 获取今日待办任务
+ * @param {Object} queryParams - 查询参数
+ * @param {number} [queryParams.currentPage=1] - 当前页码
+ * @param {number} [queryParams.pageSize=10] - 每页数量
+ * @param {number} queryParams.userId - 用户ID
+ * @returns {Promise} 返回今日待办任务列表
+ */
+export async function getTodayTasks(queryParams = {}) {
+  try {
+    const defaultQuery = {
+      currentPage: 1,
+      pageSize: 10
+    };
+    const query = { ...defaultQuery, ...queryParams };
+    const res = await http.post('/task/getTodo', query, { needLogin: true });
+    return res;
+  } catch (error) {
+    console.error('获取今日待办任务失败:', error);
+    throw error;
+  }
+}
+
+/**
+ * 获取即将截止任务（3天内）
+ * @param {Object} queryParams - 查询参数
+ * @param {number} [queryParams.currentPage=1] - 当前页码
+ * @param {number} [queryParams.pageSize=10] - 每页数量
+ * @param {number} queryParams.userId - 用户ID
+ * @returns {Promise} 返回即将截止任务列表
+ */
+export async function getUpcomingTasks(queryParams = {}) {
+  try {
+    const defaultQuery = {
+      currentPage: 1,
+      pageSize: 10
+    };
+    const query = { ...defaultQuery, ...queryParams };
+    const res = await http.post('/task/getDeadline', query, { needLogin: true });
+    return res;
+  } catch (error) {
+    console.error('获取即将截止任务失败:', error);
+    throw error;
+  }
+}
+
+/**
  * 获取任务列表
  * @param {Object} taskQuery - 任务查询参数
  * @param {number} [taskQuery.currentPage] - 当前页码（可选）
@@ -50,9 +96,11 @@ export async function getTaskInfo(id) {
  * @param {Object} addTaskForm - 添加任务表单数据
  * @param {number} addTaskForm.userId - 用户ID
  * @param {number} [addTaskForm.subjectId] - 主题ID（可选）
+ * @param {string} [addTaskForm.tagId] - 标签ID，逗号分隔的字符串（可选）
  * @param {string} addTaskForm.taskName - 任务名称
  * @param {string} [addTaskForm.description] - 任务描述（可选）
  * @param {string} [addTaskForm.deadline] - 截止时间（可选）
+ * @param {string} [addTaskForm.remindTime] - 提醒时间（可选）
  * @param {string} [addTaskForm.priority] - 优先级（可选）
  * @returns {Promise} 返回添加结果
  */

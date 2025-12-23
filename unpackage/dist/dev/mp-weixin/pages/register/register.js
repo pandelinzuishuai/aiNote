@@ -178,7 +178,7 @@ const _sfc_main = {
           email: this.registerForm.email,
           code: this.registerForm.code,
           password: this.registerForm.password,
-          permId: 0
+          permId: 1
         });
         if (result.code === 200) {
           common_vendor.index.showToast({

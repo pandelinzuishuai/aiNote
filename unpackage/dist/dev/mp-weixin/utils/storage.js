@@ -31,10 +31,13 @@ function setUserInfo(userInfo) {
 function getUserInfo() {
   try {
     const userInfo = common_vendor.index.getStorageSync(STORAGE_KEYS.USER_INFO);
-    common_vendor.index.__f__("log", "at utils/storage.js:69", "userInfo", userInfo);
+    if (!userInfo) {
+      return JSON.parse(userInfo);
+    }
+    common_vendor.index.__f__("log", "at utils/storage.js:72", "userInfo", userInfo);
     return userInfo;
   } catch (e) {
-    common_vendor.index.__f__("error", "at utils/storage.js:72", "获取用户信息失败:", e);
+    common_vendor.index.__f__("error", "at utils/storage.js:75", "获取用户信息失败:", e);
     return null;
   }
 }
@@ -42,7 +45,7 @@ function removeUserInfo() {
   try {
     common_vendor.index.removeStorageSync(STORAGE_KEYS.USER_INFO);
   } catch (e) {
-    common_vendor.index.__f__("error", "at utils/storage.js:84", "删除用户信息失败:", e);
+    common_vendor.index.__f__("error", "at utils/storage.js:87", "删除用户信息失败:", e);
   }
 }
 function getUserId() {
@@ -53,7 +56,7 @@ function getUserId() {
     }
     return common_vendor.index.getStorageSync(STORAGE_KEYS.USER_ID);
   } catch (e) {
-    common_vendor.index.__f__("error", "at utils/storage.js:160", "获取用户ID失败:", e);
+    common_vendor.index.__f__("error", "at utils/storage.js:163", "获取用户ID失败:", e);
     return null;
   }
 }
@@ -66,7 +69,7 @@ function removeUserId() {
       setUserInfo(updatedUserInfo);
     }
   } catch (e) {
-    common_vendor.index.__f__("error", "at utils/storage.js:182", "删除用户ID失败:", e);
+    common_vendor.index.__f__("error", "at utils/storage.js:185", "删除用户ID失败:", e);
   }
 }
 function clearUserData() {

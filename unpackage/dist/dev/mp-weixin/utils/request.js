@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const BASE_URL = "http://192.168.43.150:8080";
+const BASE_URL = "http://139.9.179.161:8088";
 const TIMEOUT = 3e4;
 function getToken() {
   return common_vendor.index.getStorageSync("token");

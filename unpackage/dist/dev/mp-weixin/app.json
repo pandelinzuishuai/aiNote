@@ -4,10 +4,13 @@
     "pages/login/login",
     "pages/register/register",
     "pages/notes/notes",
+    "pages/notes/add-note",
+    "pages/notes/note-detail",
     "pages/tasks/tasks",
     "pages/tasks/add-task",
     "pages/tasks/task-detail",
-    "pages/mine/mine"
+    "pages/mine/mine",
+    "pages/mine/profile"
   ],
   "window": {
     "navigationBarTextStyle": "black",

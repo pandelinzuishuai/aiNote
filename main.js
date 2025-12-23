@@ -1,3 +1,10 @@
+/*
+ * @Author: delin66
+ * @Date: 2025-11-14 20:28:38
+ * @LastEditors: delin66
+ * @LastEditTime: 2025-12-16 19:21:23
+ * @Descripttion: 
+ */
 import App from './App'
 
 // #ifndef VUE3

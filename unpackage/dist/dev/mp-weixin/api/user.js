@@ -49,7 +49,7 @@ async function updateUserInfo(updateUserForm) {
     const res = await utils_request.http.put("/user/updateUserInfo", updateUserForm, { needLogin: true });
     if (res.data) {
       const currentUserInfo = common_vendor.index.getStorageSync("userInfo") || {};
-      common_vendor.index.setStorageSync("userInfo", { ...currentUserInfo, ...updateUserForm });
+      common_vendor.index.setStorageSync("userInfo", updateUserForm);
     }
     return res;
   } catch (error) {
